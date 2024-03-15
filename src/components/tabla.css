@@ -1,0 +1,28 @@
+.lineaNaranja {
+    background-color: orange !important;
+}
+
+.ant-table-thead>tr>th {
+    background-color: #00af66  !important;
+    color: white !important;
+    font-weight: bold !important;
+}
+.ant-table-row {
+    transition: background-color 0.3s ease;
+}
+
+.selectNaranja .ant-select-selector {
+    background-color: orange !important;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+.table th, .table td {
+    text-align: left;
+    padding: 8px;
+
+}
