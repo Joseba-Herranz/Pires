@@ -7,6 +7,45 @@ const Escribir = ({ onChange, value, placeholder }) => {
     return <Input value={value} onChange={onChange} placeholder={placeholder} />;
 };
 
+const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
+    const [estado, setEstado] = useState(estadoInicial);
+
+    const naranja = ["Muestra enviada a Laboratorio", "Muestra Recibida", "Muestra en análisis", "Pendiente descarga"];
+
+    const estadoSiguiente = {
+        "Camión sin llegar": ["Camión pesada inicial"],
+        "Camión pesada inicial": ["Camión sin llegar", "Aviso a conductor para ir a descargar"],
+        "Aviso a conductor para ir a descargar": ["Camión pesada inicial", "Muestra tomada"],
+        "Muestra tomada": ["Aviso a conductor para ir a descargar", "Muestra enviada a Laboratorio"],
+        "Muestra enviada a Laboratorio": ["Muestra tomada", "Muestra Recibida por el laboratorio"],
+        "Muestra Recibida por el laboratorio": ["Muestra enviada a Laboratorio", "Muestra en análisis"],
+        "Muestra en análisis": ["Muestra Recibida por el laboratorio", "Muestra analizada", "Incidencia"],
+        "Incidencia": ["Muestra en análisis"],
+        "Muestra analizada": ["Muestra en análisis", "Vehículo pendiente de descarga"],
+        "Vehículo pendiente de descarga": ["Muestra analizada", "Vehículo descargado"],
+        "Vehículo descargado": ["Vehículo pendiente de descarga", "Vehículo pesado"],
+        "Vehículo pesado": ["Vehículo descargado", "Pedido finalizado"],
+    }
+
+    const opcionSiguiente = estadoSiguiente[estado] || [];
+
+    const handleChange = (value) => {
+        setEstado(value);
+        onEstadoChange(recordKey, value);
+    };
+
+    const selectClassName = naranja.includes(estado) ? "selectNaranja" : "";
+
+    return (
+        <Select value={estado} onChange={handleChange} className={selectClassName} style={{ width: '100%' }}>
+            {opcionSiguiente.map((siguienteEstado) => (
+                <Select.Option key={siguienteEstado} value={siguienteEstado}>
+                    {siguienteEstado}
+                </Select.Option>
+            ))}
+        </Select>
+    );
+};
 
 function TableComponent() {
 
@@ -28,6 +67,16 @@ function TableComponent() {
     const handleCancel = () => {
         setIsModalVisible(false);
     };
+
+    const handleChange = (key, nuevoEstado) => {
+        const newData = dataSource.map(item => {
+          if (item.key === key) {
+            return { ...item, estado: nuevoEstado };
+          }
+          return item;
+        });
+        setDataSource(newData);
+      };
 
     const handleObservacionesChange = (key, newObservaciones, field) => {
         const newData = dataSource.map(item => {
@@ -58,6 +107,9 @@ function TableComponent() {
             nuevaMuestra: '',
             muestrasProporcionadas: '',
             hModificacion: '08:30',
+            estado: 'Muestra enviada a Laboratorio',
+            obsvDescargador: '',
+            obsvLaboratorio: '',
         },
         {
             key: '2',
@@ -77,6 +129,9 @@ function TableComponent() {
             nuevaMuestra: '',
             muestrasProporcionadas: '',
             hModificacion: '09:40',
+            estado: 'Muestra en análisis',
+            obsvDescargador: '',
+            obsvLaboratorio: '',
         },
         {
             key: '3',
@@ -96,6 +151,9 @@ function TableComponent() {
             nuevaMuestra: '',
             muestrasProporcionadas: '',
             hModificacion: '10:15',
+            estado: 'Camión sin llegar',
+            obsvDescargador: '',
+            obsvLaboratorio: '',
         },
         {
             key: '4',
@@ -115,6 +173,9 @@ function TableComponent() {
             nuevaMuestra: '',
             muestrasProporcionadas: '',
             hModificacion: '10:00',
+            estado: 'Permiso descarga',
+            obsvDescargador: '',
+            obsvLaboratorio: '',
         },
     ]);
 
@@ -179,7 +240,18 @@ function TableComponent() {
             dataIndex: 'hModificacion',
             key: 'hModificacion',
         },
-
+        {
+            title: 'Estado',
+            dataIndex: 'estado',
+            key: 'estado',
+            render: (text, record) => (
+                <Seleccion
+                    estadoInicial={text}
+                    onEstadoChange={handleChange}
+                    recordKey={record.key}
+                />
+            ),
+        },
         {
             title: 'Punto de descarga laboratorio',
             dataIndex: 'pDescargaLab',
@@ -201,6 +273,30 @@ function TableComponent() {
                     value={record.observacionesBCO}
                     onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCO')}
                     placeholder={'Observaciones'}
+                />
+            ),
+        },
+        {
+            title: 'Observaciones descargador',
+            dataIndex: 'obsDescargador',
+            key: 'obsDescargador',
+            render: (_, record) => (
+                <Escribir
+                    value={record.obsDescargador}
+                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'obsDescargador')}
+                    placeholder={'Observaciones descargas'}
+                />
+            ),
+        },
+        {
+            title: 'Observaciones laboratorio',
+            dataIndex: 'obsLaboratorio',
+            key: 'obsLaboratorio',
+            render: (_, record) => (
+                <Escribir
+                    value={record.muestrasProporcionadas}
+                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'obsLaboratorio')}
+                    placeholder={'Observaciones laboratorio'}
                 />
             ),
         },

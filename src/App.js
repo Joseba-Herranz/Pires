@@ -6,6 +6,9 @@ import { Layout, Menu } from 'antd';
 import Table from './components/Bacula';
 import Table2 from './components/BasculaCompleta';
 import Lab from './components/LaboratorioCompleto';
+import Desc from './components/DescargadorCompleto';
+import logo from './pictures/LogoAgaleus_ico.svg';
+
 
 const { Header, Content } = Layout;
 
@@ -14,10 +17,11 @@ function App() {
     <Router>
       <Layout>
         <Header>
+          
           <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']} style={{ backgroundColor: '#005157' }}>
-            {/* <Menu.Item key="0">
-              <img src="./pictures/LogoAgaleus_ico.svg" alt="Logo"/>
-            </Menu.Item> */}
+            <Menu.Item key="0" style={{ paddingLeft: '0' }}>
+            <img src={logo} alt="Logo" className="logo"/>
+            </Menu.Item>
             <Menu.Item key="1">
               <Link to="/">Bascula</Link>
             </Menu.Item>
@@ -27,6 +31,9 @@ function App() {
             <Menu.Item key="3">
               <Link to="/lab">Laboratorio completa</Link>
             </Menu.Item>
+            <Menu.Item key="4">
+              <Link to="/desc">Descargador completa</Link>
+            </Menu.Item>
           </Menu>
         </Header>
         <Content>
@@ -35,6 +42,7 @@ function App() {
               <Route path='/' element={<Table />} />
               <Route path='/table2' element={<Table2 />} />
               <Route path='/lab' element={<Lab />} />
+              <Route path='/desc' element={<Desc />} />
             </Routes>
           </div>
         </Content>

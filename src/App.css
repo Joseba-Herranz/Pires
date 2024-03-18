@@ -17,6 +17,13 @@
   background-color: #005157 !important;
 }
 
+.logo {
+  height: 50px; 
+  width: auto; 
+  vertical-align: middle; 
+  margin-left: -2em;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
