@@ -17,6 +17,14 @@
   background-color: #005157 !important;
 }
 
+.ant-menu-dark .ant-menu-item-selected {
+  background-color: #00af66 !important;
+}
+
+.ant-menu-dark .ant-menu-item a {
+  color: #ededed !important; 
+}
+
 .logo {
   height: 50px; 
   width: auto; 

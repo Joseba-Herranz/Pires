@@ -10,18 +10,20 @@ const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
 
   const estadoSiguiente = {
     "Camión sin llegar": ["Camión pesada inicial"],
-    "Camión pesada inicial": ["Camión sin llegar", "Aviso a conductor para ir a descargar"],
-    "Aviso a conductor para ir a descargar": ["Camión pesada inicial", "Muestra tomada"],
-    "Muestra tomada": ["Aviso a conductor para ir a descargar", "Muestra enviada a Laboratorio"],
+    "Camión pesada inicial": ["Camión sin llegar", "Aviso a conductor para toma de muestra"],
+    "Aviso a conductor para toma de muestra": ["Camión pesada inicial", "Muestra tomada"],
+    "Muestra tomada": ["Aviso a conductor para toma de muestra", "Muestra enviada a Laboratorio"],
     "Muestra enviada a Laboratorio": ["Muestra tomada", "Muestra Recibida por el laboratorio"],
     "Muestra Recibida por el laboratorio": ["Muestra enviada a Laboratorio", "Muestra en análisis"],
     "Muestra en análisis": ["Muestra Recibida por el laboratorio", "Muestra analizada", "Incidencia"],
     "Incidencia": ["Muestra en análisis"],
-    "Muestra analizada": ["Muestra en análisis", "Vehículo pendiente de descarga"],
-    "Vehículo pendiente de descarga": ["Muestra analizada", "Vehículo descargado"],
-    "Vehículo descargado": ["Vehículo pendiente de descarga", "Vehículo pesado"],
-    "Vehículo pesado": ["Vehículo descargado", "Pedido finalizado"],
-  }
+    "Muestra analizada": ["Muestra en análisis", "Pedido con Permiso descarga"],
+    "Pedido con Permiso descarga": ["Muestra analizada", "Aviso a conductor para ir a descargar"],
+    "Aviso a conductor para ir a descargar": ["Pedido con Permiso descarga", "Vehículo descargado"],
+    "Vehículo descargado": ["Aviso a conductor para ir a descargar", "Vehículo pesado"],
+    "Vehículo pesado": ["Vehículo descargado", "Pedido finalizado", "Pedido con Permiso descarga"],
+}
+
 
   const opcionSiguiente = estadoSiguiente[estado] || [];
 
@@ -94,7 +96,7 @@ function TableComponent() {
       nPedido: '010104',
       name: 'ALUDIUM',
       hPesado: '12:00',
-      nMatricula: 'MATR004',
+      nMatricula: '4314RDC',
       nomConductor: 'Juan',
       observacionesTrans: '',
       descripcion: 'Acido',
@@ -110,7 +112,7 @@ function TableComponent() {
       nPedido: '010105',
       name: 'ALUDIUM',
       hPesado: '12:00',
-      nMatricula: 'MATR005',
+      nMatricula: '2234JPT',
       nomConductor: 'Pepe',
       observacionesTrans: '',
       descripcion: 'Acido',
@@ -126,7 +128,7 @@ function TableComponent() {
       nPedido: '010106',
       name: 'ALUDIUM',
       hPesado: '12:00',
-      nMatricula: 'MATR006',
+      nMatricula: '2052JUN',
       nomConductor: 'Francisco',
       observacionesTrans: '',
       descripcion: 'Acido',

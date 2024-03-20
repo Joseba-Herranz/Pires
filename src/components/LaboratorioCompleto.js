@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Select, Input, Modal, Button } from 'antd';
+import { Table, Select, Input, Modal, Button, Checkbox } from 'antd';
 //import 'antd/dist/antd.css';
 import './tabla.css';
 
@@ -10,22 +10,24 @@ const Escribir = ({ onChange, value, placeholder }) => {
 const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
     const [estado, setEstado] = useState(estadoInicial);
 
-    const naranja = ["Muestra enviada a Laboratorio", "Muestra Recibida", "Muestra en análisis", "Pendiente descarga"];
+    const naranja = ['Muestra enviada a Laboratorio', 'Muestra Recibida', 'Muestra en análisis', 'Pendiente descarga'];
 
     const estadoSiguiente = {
-        "Camión sin llegar": ["Camión pesada inicial"],
-        "Camión pesada inicial": ["Camión sin llegar", "Aviso a conductor para toma de muestra"],
-        "Aviso a conductor para toma de muestra": ["Camión pesada inicial", "Muestra tomada"],
-        "Muestra tomada": ["Aviso a conductor para toma de muestra", "Muestra enviada a Laboratorio"],
-        "Muestra enviada a Laboratorio": ["Muestra tomada", "Muestra Recibida por el laboratorio"],
-        "Muestra Recibida por el laboratorio": ["Muestra enviada a Laboratorio", "Muestra en análisis"],
-        "Muestra en análisis": ["Muestra Recibida por el laboratorio", "Muestra analizada", "Incidencia"],
-        "Incidencia": ["Muestra en análisis"],
-        "Muestra analizada": ["Muestra en análisis", "Vehículo pendiente de descarga"],
-        "Vehículo pendiente de descarga": ["Muestra analizada", "Vehículo descargado"],
-        "Vehículo descargado": ["Vehículo pendiente de descarga", "Vehículo pesado"],
-        "Vehículo pesado": ["Vehículo descargado", "Pedido finalizado"],
+        'Camión sin llegar': ['Camión pesada inicial'],
+        'Camión pesada inicial': ['Camión sin llegar', 'Aviso a conductor para toma de muestra'],
+        'Aviso a conductor para toma de muestra': ['Camión pesada inicial', 'Muestra tomada'],
+        'Muestra tomada': ['Aviso a conductor para toma de muestra', 'Muestra enviada a Laboratorio'],
+        'Muestra enviada a Laboratorio': ['Muestra tomada', 'Muestra Recibida por el laboratorio'],
+        'Muestra Recibida por el laboratorio': ['Muestra enviada a Laboratorio', 'Muestra en análisis'],
+        'Muestra en análisis': ['Muestra Recibida por el laboratorio', 'Muestra analizada', 'Incidencia'],
+        'Incidencia': ['Muestra en análisis'],
+        'Muestra analizada': ['Muestra en análisis', 'Pedido con Permiso descarga'],
+        'Pedido con Permiso descarga': ['Muestra analizada', 'Aviso a conductor para ir a descargar'],
+        'Aviso a conductor para ir a descargar': ['Pedido con Permiso descarga', 'Vehículo descargado'],
+        'Vehículo descargado': ['Aviso a conductor para ir a descargar', 'Vehículo pesado'],
+        'Vehículo pesado': ['Vehículo descargado', 'Pedido finalizado', 'Pedido con Permiso descarga'],
     }
+
 
     const opcionSiguiente = estadoSiguiente[estado] || [];
 
@@ -34,7 +36,7 @@ const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
         onEstadoChange(recordKey, value);
     };
 
-    const selectClassName = naranja.includes(estado) ? "selectNaranja" : "";
+    const selectClassName = naranja.includes(estado) ? 'selectNaranja' : '';
 
     return (
         <Select value={estado} onChange={handleChange} className={selectClassName} style={{ width: '100%' }}>
@@ -70,13 +72,13 @@ function TableComponent() {
 
     const handleChange = (key, nuevoEstado) => {
         const newData = dataSource.map(item => {
-          if (item.key === key) {
-            return { ...item, estado: nuevoEstado };
-          }
-          return item;
+            if (item.key === key) {
+                return { ...item, estado: nuevoEstado };
+            }
+            return item;
         });
         setDataSource(newData);
-      };
+    };
 
     const handleObservacionesChange = (key, newObservaciones, field) => {
         const newData = dataSource.map(item => {
@@ -88,6 +90,18 @@ function TableComponent() {
         setDataSource(newData);
     };
 
+    const handleCheck = (e, key) => {
+        const checked = e.target.checked;
+        setDataSource((prevData) =>
+            prevData.map((item) => {
+                if (item.key === key) {
+                    return { ...item, envasado: checked };
+                }
+                return item;
+            })
+        );
+    };
+
     const [dataSource, setDataSource] = useState([
         {
             key: '1',
@@ -95,12 +109,12 @@ function TableComponent() {
             pBruto: '25',
             pNeto: '20',
             nBultos: '4',
-            envasado: 'Tambores',
-            tipo: 'Líquido',
+            envasado: true,
+            tipo: 'Articulo',
             descripcion: 'Ácido sulfúrico',
             cAlmacen: '1030',
             cantBascula: '15',
-            tBulto: 'Ácido',
+            tBulto: '20010',
             bultos: '4',
             pDescargaLab: '',
             observacionesBCO: '',
@@ -117,12 +131,12 @@ function TableComponent() {
             pBruto: '30',
             pNeto: '25',
             nBultos: '5',
-            envasado: 'Barril',
-            tipo: 'Sólido',
-            descripcion: 'Ácido cítrico',
+            envasado: true,
+            tipo: 'Articulo',
+            descripcion: 'Ácido sulfúrico',
             cAlmacen: '1030',
             cantBascula: '20',
-            tBulto: 'Ácido',
+            tBulto: '20010',
             bultos: '5',
             pDescargaLab: '',
             observacionesBCO: '',
@@ -139,12 +153,12 @@ function TableComponent() {
             pBruto: '28',
             pNeto: '23',
             nBultos: '6',
-            envasado: 'Bolsas',
-            tipo: 'Sólido',
-            descripcion: 'Ácido oxálico',
+            envasado: false,
+            tipo: 'Articulo',
+            descripcion: 'Ácido sulfúrico',
             cAlmacen: '1030',
             cantBascula: '18',
-            tBulto: 'Ácido',
+            tBulto: '20010',
             bultos: '6',
             pDescargaLab: '',
             observacionesBCO: '',
@@ -161,12 +175,12 @@ function TableComponent() {
             pBruto: '30',
             pNeto: '20',
             nBultos: '5',
-            envasado: 'Barril',
-            tipo: 'Líquido',
-            descripcion: 'Ácido clorhídrico',
+            envasado: false,
+            tipo: 'Articulo',
+            descripcion: 'Ácido sulfúrico',
             cAlmacen: '1030',
             cantBascula: '20',
-            tBulto: 'Ácido',
+            tBulto: '20010',
             bultos: '5',
             pDescargaLab: '',
             observacionesBCO: '',
@@ -204,6 +218,9 @@ function TableComponent() {
             title: 'Envasado',
             dataIndex: 'envasado',
             key: 'envasado',
+            render: (text, record) => (
+                <Checkbox checked={record.envasado} onChange={(e) => handleCheck(e, record.key)} />
+            ),
         },
         {
             title: 'Tipo',
@@ -253,6 +270,18 @@ function TableComponent() {
             ),
         },
         {
+            title: 'Observaciones descargador',
+            dataIndex: 'obsDescargador',
+            key: 'obsDescargador',
+
+        },
+        {
+            title: 'Observaciones bascula',
+            dataIndex: 'obsLaboratorio',
+            key: 'obsLaboratorio',
+
+        },
+        {
             title: 'Punto de descarga laboratorio',
             dataIndex: 'pDescargaLab',
             key: 'pDescargaLab',
@@ -273,30 +302,6 @@ function TableComponent() {
                     value={record.observacionesBCO}
                     onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCO')}
                     placeholder={'Observaciones'}
-                />
-            ),
-        },
-        {
-            title: 'Observaciones descargador',
-            dataIndex: 'obsDescargador',
-            key: 'obsDescargador',
-            render: (_, record) => (
-                <Escribir
-                    value={record.obsDescargador}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'obsDescargador')}
-                    placeholder={'Observaciones descargas'}
-                />
-            ),
-        },
-        {
-            title: 'Observaciones laboratorio',
-            dataIndex: 'obsLaboratorio',
-            key: 'obsLaboratorio',
-            render: (_, record) => (
-                <Escribir
-                    value={record.muestrasProporcionadas}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'obsLaboratorio')}
-                    placeholder={'Observaciones laboratorio'}
                 />
             ),
         },
@@ -333,7 +338,7 @@ function TableComponent() {
     }));
 
     return (
-        <div className="Table">
+        <div className='Table'>
             <Table dataSource={dataSource} columns={columns()} pagination={false} />
         </div>
     );

@@ -1,10 +1,6 @@
-.lineaNaranja {
-    background-color: orange !important;
-}
-
 .ant-table-thead>tr>th {
     background-color: #00af66  !important;
-    color: white !important;
+    color: #ededed !important;
     font-weight: bold !important;
 }
 .ant-table-row {
@@ -14,6 +10,10 @@
 .selectNaranja .ant-select-selector {
     background-color: orange !important;
 }
+/* 
+.selectNaranja .ant-select-selector {
+    background-color: #00de86 !important;
+} */
 
 .table {
     width: 100%;

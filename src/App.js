@@ -17,10 +17,10 @@ function App() {
     <Router>
       <Layout>
         <Header>
-          
+
           <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']} style={{ backgroundColor: '#005157' }}>
             <Menu.Item key="0" style={{ paddingLeft: '0' }}>
-            <img src={logo} alt="Logo" className="logo"/>
+              <img src={logo} alt="Logo" className="logo" />
             </Menu.Item>
             <Menu.Item key="1">
               <Link to="/">Bascula</Link>

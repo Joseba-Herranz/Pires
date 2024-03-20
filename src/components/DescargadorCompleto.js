@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Select, Input, Modal, Button } from 'antd';
+import { Table, Select, Input, Modal, Button, Checkbox } from 'antd';
 //import 'antd/dist/antd.css';
 import './tabla.css';
 
@@ -10,21 +10,22 @@ const Escribir = ({ onChange, value, placeholder }) => {
 const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
     const [estado, setEstado] = useState(estadoInicial);
 
-    const naranja = ["Camión pesada inicial", "Aviso a conductor para toma de muestra", "Muestra tomada", "Pedido con Permiso descarga"];
+    const naranja = ['Camión pesada inicial', 'Aviso a conductor para toma de muestra', 'Muestra tomada', 'Pedido con Permiso descarga'];
 
     const estadoSiguiente = {
-        "Camión sin llegar": ["Camión pesada inicial"],
-        "Camión pesada inicial": ["Camión sin llegar", "Aviso a conductor para ir a descargar"],
-        "Aviso a conductor para ir a descargar": ["Camión pesada inicial", "Muestra tomada"],
-        "Muestra tomada": ["Aviso a conductor para ir a descargar", "Muestra enviada a Laboratorio"],
-        "Muestra enviada a Laboratorio": ["Muestra tomada", "Muestra Recibida por el laboratorio"],
-        "Muestra Recibida por el laboratorio": ["Muestra enviada a Laboratorio", "Muestra en análisis"],
-        "Muestra en análisis": ["Muestra Recibida por el laboratorio", "Muestra analizada", "Incidencia"],
-        "Incidencia": ["Muestra en análisis"],
-        "Muestra analizada": ["Muestra en análisis", "Vehículo pendiente de descarga"],
-        "Vehículo pendiente de descarga": ["Muestra analizada", "Vehículo descargado"],
-        "Vehículo descargado": ["Vehículo pendiente de descarga", "Vehículo pesado"],
-        "Vehículo pesado": ["Vehículo descargado", "Pedido finalizado"],
+        'Camión sin llegar': ['Camión pesada inicial'],
+        'Camión pesada inicial': ['Camión sin llegar', 'Aviso a conductor para toma de muestra'],
+        'Aviso a conductor para toma de muestra': ['Camión pesada inicial', 'Muestra tomada'],
+        'Muestra tomada': ['Aviso a conductor para toma de muestra', 'Muestra enviada a Laboratorio'],
+        'Muestra enviada a Laboratorio': ['Muestra tomada', 'Muestra Recibida por el laboratorio'],
+        'Muestra Recibida por el laboratorio': ['Muestra enviada a Laboratorio', 'Muestra en análisis'],
+        'Muestra en análisis': ['Muestra Recibida por el laboratorio', 'Muestra analizada', 'Incidencia'],
+        'Incidencia': ['Muestra en análisis'],
+        'Muestra analizada': ['Muestra en análisis', 'Pedido con Permiso descarga'],
+        'Pedido con Permiso descarga': ['Muestra analizada', 'Aviso a conductor para ir a descargar'],
+        'Aviso a conductor para ir a descargar': ['Pedido con Permiso descarga', 'Vehículo descargado'],
+        'Vehículo descargado': ['Aviso a conductor para ir a descargar', 'Vehículo pesado'],
+        'Vehículo pesado': ['Vehículo descargado', 'Pedido finalizado', 'Pedido con Permiso descarga'],
     }
 
     const opcionSiguiente = estadoSiguiente[estado] || [];
@@ -34,7 +35,7 @@ const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
         onEstadoChange(recordKey, value);
     };
 
-    const selectClassName = naranja.includes(estado) ? "selectNaranja" : "";
+    const selectClassName = naranja.includes(estado) ? 'selectNaranja' : '';
 
     return (
         <Select value={estado} onChange={handleChange} className={selectClassName} style={{ width: '100%' }}>
@@ -88,6 +89,18 @@ function TableComponent() {
         setDataSource(newData);
     };
 
+    const handleCheck = (e, key) => {
+        const checked = e.target.checked;
+        setDataSource((prevData) =>
+            prevData.map((item) => {
+                if (item.key === key) {
+                    return { ...item, envasado: checked };
+                }
+                return item;
+            })
+        );
+    };
+
     const [dataSource, setDataSource] = useState([
         {
             key: '1',
@@ -96,125 +109,126 @@ function TableComponent() {
             hPesado: '08:00',
             carga: '30',
             nBultos: '4',
-            envasado: 'Tambores',
-            nMatricula: '1234ABC',
+            envasado: true,
+            nMatricula: '1020ALD',
             nConductor: 'Juan Pérez',
-            descripcion: 'Ácido sulfúrico',
+            descripcion: 'Acido',
             cAlmacen: '1030',
             cBascula: '15',
             pDescarga: '1030',
             cPrevista: '15',
-            estado: 'Muestra enviada a Laboratorio',
+            estado: 'Camión pesada inicial',
             obsvLaboratorio: '',
             obsvDescargador: '',
         },
-
         {
-            key: "2",
-            vNombre: "020202",
-            fPedido: "2021-11-15",
-            hPesado: "10:30",
-            carga: "45",
-            nBultos: "2",
-            envasado: "Bolsas",
-            nMatricula: "5678DEF",
-            nConductor: "Laura Gómez",
-            descripcion: "Hidróxido de sodio",
-            cAlmacen: "2045",
-            cBascula: "20",
-            pDescarga: "1030",
-            cPrevista: "20",
-            estado: "En tránsito",
-            obsvLaboratorio: "",
-            obsvDescargador: ""
+            key: '2',
+            vNombre: '020202',
+            fPedido: '2021-11-15',
+            hPesado: '10:30',
+            carga: '45',
+            nBultos: '2',
+            envasado: true,
+            nMatricula: '2030JBD',
+            nConductor: 'Laura Gómez',
+            descripcion: 'Acido',
+            cAlmacen: '2045',
+            cBascula: '20',
+            pDescarga: '1030',
+            cPrevista: '20',
+            estado: 'Aviso a conductor para toma de muestra',
+            obsvLaboratorio: '',
+            obsvDescargador: ''
         },
         {
-            key: "3",
-            vNombre: "030303",
-            fPedido: "2022-01-10",
-            hPesado: "07:45",
-            carga: "50",
-            nBultos: "5",
-            envasado: "Cajas",
-            nMatricula: "91011GHI",
-            nConductor: "Carlos Ruiz",
-            descripcion: "Cloruro de potasio",
-            cAlmacen: "3075",
-            cBascula: "25",
-            pDescarga: "1030",
-            cPrevista: "25",
-            estado: "Descargado",
-            obsvLaboratorio: "",
-            obsvDescargador: ""
+            key: '3',
+            vNombre: '030303',
+            fPedido: '2022-01-10',
+            hPesado: '07:45',
+            carga: '50',
+            nBultos: '5',
+            envasado: true,
+            nMatricula: '5041OKL',
+            nConductor: 'Carlos Ruiz',
+            descripcion: 'Acido',
+            cAlmacen: '3075',
+            cBascula: '25',
+            pDescarga: '1030',
+            cPrevista: '25',
+            estado: 'Muestra analizada',
+            obsvLaboratorio: '',
+            obsvDescargador: ''
         },
-
     ]);
 
     const columns = () => ([
         {
-            title: "Venta a nombre",
-            dataIndex: "vNombre",
-            key: "vNombre"
+            title: 'Venta a nombre',
+            dataIndex: 'vNombre',
+            key: 'vNombre'
         },
         {
-            title: "Fecha prevista del pedido",
-            dataIndex: "fPedido",
-            key: "fPedido"
+            title: 'Fecha prevista del pedido',
+            dataIndex: 'fPedido',
+            key: 'fPedido'
         },
         {
-            title: "Hora pesado bruto",
-            dataIndex: "hPesado",
-            key: "hPesado"
+            title: 'Hora pesado bruto',
+            dataIndex: 'hPesado',
+            key: 'hPesado'
         },
         {
-            title: "Carga",
-            dataIndex: "carga",
-            key: "carga"
+            title: 'Carga',
+            dataIndex: 'carga',
+            key: 'carga'
         },
         {
-            title: "Nº de bultos",
-            dataIndex: "nBultos",
-            key: "nBultos"
+            title: 'Nº de bultos',
+            dataIndex: 'nBultos',
+            key: 'nBultos'
         },
         {
-            title: "Envasado",
-            dataIndex: "envasado",
-            key: "envasado"
+            title: 'Envasado',
+            dataIndex: 'envasado',
+            key: 'envasado',
+            render: (text, record) => (
+                <Checkbox checked={record.envasado} onChange={(e) => handleCheck(e, record.key)} />
+            ),
         },
         {
-            title: "Nº matricula",
-            dataIndex: "nMatricula",
-            key: "nMatricula"
+            title: 'Nº matricula',
+            dataIndex: 'nMatricula',
+            key: 'nMatricula'
         },
         {
-            title: "Nombre conductor",
-            dataIndex: "nConductor",
-            key: "nConductor"
+            title: 'Nombre conductor',
+            dataIndex: 'nConductor',
+            key: 'nConductor'
         },
         {
-            title: "Descripcion",
-            dataIndex: "descripcion",
-            key: "descripcion"
+            title: 'Descripcion',
+            dataIndex: 'descripcion',
+            key: 'descripcion'
         },
         {
-            title: "Codigo de almacen",
-            dataIndex: "cAlmacen",
-            key: "cAlmacen"
+            title: 'Codigo de almacen',
+            dataIndex: 'cAlmacen',
+            key: 'cAlmacen'
         },
         {
-            title: "Cantidad en bascula",
-            dataIndex: "cBascula",
-            key: "cBascula"
+            title: 'Cantidad en bascula',
+            dataIndex: 'cBascula',
+            key: 'cBascula'
         },
         {
-            title: "Punto de descarga",
-            dataIndex: "pDescarga",
-            key: "pDescarga"
+            title: 'Punto de descarga',
+            dataIndex: 'pDescarga',
+            key: 'pDescarga'
         },
         {
-            title: "Cantidad prevista",
-            dataIndex: "cPrevista",
-            key: "cPrevista"
+            title: 'Cantidad prevista',
+            dataIndex: 'cPrevista',
+            key: 'cPrevista'
         },
         {
             title: 'Estado',
@@ -229,19 +243,20 @@ function TableComponent() {
             ),
         },
         {
-            title: 'Observaciones de laboratrorio',
+            title: 'Observaciones de laboratorio',
             dataIndex: 'obsvLaboratorio',
             key: 'obsvLaboratorio',
-            render: (_, record) => (
-                <Escribir
-                    value={record.pDescargaLab}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'obsvLaboratorio')}
-                    placeholder={'Observaciones de laboratrorio'}
-                />
-            ),
+
+        },
+
+        {
+            title: 'Observaciones de Bascula',
+            dataIndex: 'obsvLaboratorio',
+            key: 'obsvLaboratorio',
+
         },
         {
-            title: 'Observaciones de descarga',
+            title: 'Observaciones de descargador',
             dataIndex: 'obsvDescargador',
             key: 'obsvDescargador',
             render: (_, record) => (
@@ -260,7 +275,7 @@ function TableComponent() {
     }));
 
     return (
-        <div className="Table">
+        <div className='Table'>
             <Table dataSource={dataSource} columns={columns()} pagination={false} />
         </div>
     );
