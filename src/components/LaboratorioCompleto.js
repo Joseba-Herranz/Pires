@@ -14,9 +14,9 @@ const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
 
     const estadoSiguiente = {
         "Camión sin llegar": ["Camión pesada inicial"],
-        "Camión pesada inicial": ["Camión sin llegar", "Aviso a conductor para ir a descargar"],
-        "Aviso a conductor para ir a descargar": ["Camión pesada inicial", "Muestra tomada"],
-        "Muestra tomada": ["Aviso a conductor para ir a descargar", "Muestra enviada a Laboratorio"],
+        "Camión pesada inicial": ["Camión sin llegar", "Aviso a conductor para toma de muestra"],
+        "Aviso a conductor para toma de muestra": ["Camión pesada inicial", "Muestra tomada"],
+        "Muestra tomada": ["Aviso a conductor para toma de muestra", "Muestra enviada a Laboratorio"],
         "Muestra enviada a Laboratorio": ["Muestra tomada", "Muestra Recibida por el laboratorio"],
         "Muestra Recibida por el laboratorio": ["Muestra enviada a Laboratorio", "Muestra en análisis"],
         "Muestra en análisis": ["Muestra Recibida por el laboratorio", "Muestra analizada", "Incidencia"],
