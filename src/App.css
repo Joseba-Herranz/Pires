@@ -18,7 +18,7 @@
 }
 
 .ant-menu-dark .ant-menu-item-selected {
-  background-color: #00af66 !important;
+  background-color: #00de86 !important;
 }
 
 .ant-menu-dark .ant-menu-item a {
@@ -55,3 +55,4 @@
     transform: rotate(360deg);
   }
 }
+

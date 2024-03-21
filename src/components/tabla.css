@@ -7,14 +7,6 @@
     transition: background-color 0.3s ease;
 }
 
-.selectNaranja .ant-select-selector {
-    background-color: orange !important;
-}
-/* 
-.selectNaranja .ant-select-selector {
-    background-color: #00de86 !important;
-} */
-
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -25,4 +17,30 @@
     text-align: left;
     padding: 8px;
 
+}
+
+.selectNaranja .ant-select-selector {
+    background-color: orange !important; 
+}
+
+.selectRojo .ant-select-selector {
+    background-color: red !important; 
+}
+
+.selectNaranja.ant-select-open .ant-select-selector,
+.selectNaranja.ant-select-focused .ant-select-selector,
+.selectRojo.ant-select-open .ant-select-selector,
+.selectRojo.ant-select-focused .ant-select-selector {
+    background-color: inherit !important;
+}
+
+
+.ant-checkbox-wrapper-checked .ant-checkbox-inner {
+    background-color: #ededed;
+    border-color: grey; 
+}
+
+
+.ant-checkbox-checked .ant-checkbox-inner::after {
+    border-color: #1d1d1d; 
 }
