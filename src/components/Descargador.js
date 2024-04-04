@@ -190,6 +190,131 @@ function TableComponent() {
     ]);
 
     const columns = () => ([
+        // {
+        //     title: 'Venta a nombre',
+        //     dataIndex: 'vNombre',
+        //     key: 'vNombre'
+        // },
+        // {
+        //     title: 'Fecha prevista del pedido',
+        //     dataIndex: 'fPedido',
+        //     key: 'fPedido'
+        // },
+        // {
+        //     title: 'Hora pesado bruto',
+        //     dataIndex: 'hPesado',
+        //     key: 'hPesado'
+        // },
+        // {
+        //     title: 'Carga',
+        //     dataIndex: 'carga',
+        //     key: 'carga'
+        // },
+        // {
+        //     title: 'Nº de bultos',
+        //     dataIndex: 'nBultos',
+        //     key: 'nBultos'
+        // },
+        // {
+        //     title: 'Envasado',
+        //     dataIndex: 'envasado',
+        //     key: 'envasado',
+        //     render: (text, record) => (
+        //         <Checkbox checked={record.envasado} onChange={(e) => handleCheck(e, record.key)} />
+        //     ),
+        // },
+        // {
+        //     title: 'Nº matricula',
+        //     dataIndex: 'nMatricula',
+        //     key: 'nMatricula'
+        // },
+        // {
+        //     title: 'Nombre conductor',
+        //     dataIndex: 'nConductor',
+        //     key: 'nConductor'
+        // },
+        {
+            title: 'Descripcion',
+            dataIndex: 'descripcion',
+            key: 'descripcion'
+        },
+        // {
+        //     title: 'Codigo de almacen',
+        //     dataIndex: 'cAlmacen',
+        //     key: 'cAlmacen'
+        // },
+        // {
+        //     title: 'Cantidad en bascula ',
+        //     dataIndex: 'cBascula',
+        //     key: 'cBascula'
+        // },
+        {
+            title: 'Punto de descarga',
+            dataIndex: 'pDescarga',
+            key: 'pDescarga'
+        },
+        {
+            title: 'Cantidad prevista',
+            dataIndex: 'cPrevista',
+            key: 'cPrevista'
+        },
+       
+        {
+            title: 'Observaciones de laboratorio',
+            dataIndex: 'obsvLaboratorio',
+            key: 'obsvLaboratorio',
+            // render: (_, record) => (
+            //     <Button onClick={() => showObservacionesModal(record)}>Ver observaciones</Button>
+            // ),
+
+        },
+        {
+            title: 'Observaciones de Bascula',
+            dataIndex: 'obsvLaboratorio',
+            key: 'obsvLaboratorio',
+
+        },
+        {
+            title: 'Estado',
+            dataIndex: 'estado',
+            key: 'estado',
+            render: (text, record) => (
+                <Seleccion
+                    estadoInicial={text}
+                    onEstadoChange={handleChange}
+                    recordKey={record.key}
+                    naranja={naranja}
+                />
+
+            ),
+        },
+        {
+            title: 'Observaciones de descargador',
+            dataIndex: 'obsvDescargador',
+            key: 'obsvDescargador',
+            render: (_, record) => (
+                <Escribir
+                    value={record.pDescargaLab}
+                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'obsvDescargador')}
+                    placeholder={'Observaciones de Descarga'}
+                />
+            ),
+        },
+        {
+            title: 'Detalles',
+            key: 'detalles',
+            render: (_, record) => (
+                <Button onClick={() => showModal(record)}>Ver Detalles</Button>
+            ),
+        }, 
+    ]).map(col => ({
+        ...col,
+        onHeaderCell: () => ({
+            style: { backgroundColor: '#f0f2f5' }
+        }),
+    }));
+
+    const columns2 = () => ([
         {
             title: 'Venta a nombre',
             dataIndex: 'vNombre',
@@ -306,6 +431,24 @@ function TableComponent() {
     return (
         <div className='Table'>
             <Table dataSource={dataSource} columns={columns()} pagination={false} />
+            <Modal title="Detalles de la fila" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+                <table className='table'>
+                    <tbody>
+                        {columns2().map(column => (
+                            <tr key={column.key}>
+                                <th>{column.title}</th>
+                                <td>{selectedRowDetails ? selectedRowDetails[column.dataIndex] : ''}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Modal>
+            {/* <Modal title="Observaciones" visible={isObservacionesModalVisible} onOk={() => setIsObservacionesModalVisible(false)} onCancel={() => setIsObservacionesModalVisible(false)}>
+    <p>{selectedRowDetails?.obsvDescargador}</p>
+    <p>{selectedRowDetails?.obsvLaboratorio}</p> */}
+   
+{/* </Modal> */}
+
         </div>
     );
 }

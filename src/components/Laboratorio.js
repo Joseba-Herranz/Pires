@@ -227,6 +227,164 @@ function TableComponent() {
             dataIndex: 'vNombre',
             key: 'vNombre',
         },
+        // {
+        //     title: 'Peso bruto',
+        //     dataIndex: 'pBruto',
+        //     key: 'pBruto',
+        // },
+        
+        // {
+        //     title: 'Nº Bultos',
+        //     dataIndex: 'nBultos',
+        //     key: 'nBultos',
+        // },
+        // {
+        //     title: 'Envasado',
+        //     dataIndex: 'envasado',
+        //     key: 'envasado',
+        //     render: (text, record) => (
+        //         <Checkbox checked={record.envasado} onChange={(e) => handleCheck(e, record.key)} />
+        //     ),
+        // },
+        // {
+        //     title: 'Tipo',
+        //     dataIndex: 'tipo',
+        //     key: 'tipo',
+        // },
+        {
+            title: 'Descripción',
+            dataIndex: 'descripcion',
+            key: 'descripcion',
+        },
+        {
+            title: 'Código almacén',
+            dataIndex: 'cAlmacen',
+            key: 'cAlmacen',
+        },
+        {
+            title: 'Peso neto',
+            dataIndex: 'pNeto',
+            key: 'pNeto',
+        },
+        {
+            title: 'Cantidad Báscula',
+            dataIndex: 'cantBascula',
+            key: 'cantBascula',
+        },
+
+        {
+            title: 'Tipo bulto',
+            dataIndex: 'tBulto',
+            key: 'tBulto',
+        },
+        // {
+        //     title: 'Bultos',
+        //     dataIndex: 'bultos',
+        //     key: 'bultos',
+        // },
+        
+        
+        {
+            title: 'Observaciones descargador',
+            dataIndex: 'obsDescargador',
+            key: 'obsDescargador',
+
+        },
+        {
+            title: 'Observaciones bascula',
+            dataIndex: 'obsLaboratorio',
+            key: 'obsLaboratorio',
+
+        },
+        {
+            title: 'Muestras Proporcionadas',
+            dataIndex: 'muestrasProporcionadas',
+            key: 'muestrasProporcionadas',
+            // render: (_, record) => (
+            //     <Escribir
+            //         value={record.muestrasProporcionadas}
+            //         onChange={e => handleObservacionesChange(record.key, e.target.value, 'muestrasProporcionadas')}
+            //         placeholder={'Muestra'}
+            //     />
+            // ),
+        },
+        {
+            title: 'Hora modificación',
+            dataIndex: 'hModificacion',
+            key: 'hModificacion',
+        },
+        {
+            title: 'Estado',
+            dataIndex: 'estado',
+            key: 'estado',
+            render: (text, record) => (
+                <Seleccion
+                    estadoInicial={text}
+                    onEstadoChange={handleChange}
+                    recordKey={record.key}
+                    naranja={naranja}
+                />
+
+            ),
+        },
+        {
+            title: 'Punto de descarga laboratorio',
+            dataIndex: 'pDescargaLab',
+            key: 'pDescargaLab',
+            render: (_, record) => (
+                <Escribir
+                    value={record.pDescargaLab}
+                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'pDescargaLab')}
+                    placeholder={'Punto de Descarga'}
+                />
+            ),
+        },
+        {
+            title: 'Observaciones',
+            dataIndex: 'observacionesBCO',
+            key: 'observacionesBCO',
+            render: (_, record) => (
+                <Escribir
+                    value={record.observacionesBCO}
+                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCO')}
+                    placeholder={'Observaciones'}
+                />
+            ),
+        },
+        {
+            title: 'Solicita nueva muestra',
+            dataIndex: 'nuevaMuestra',
+            key: 'nuevaMuestra',
+            render: (_, record) => (
+                <Escribir
+                    value={record.nuevaMuestra}
+                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'nuevaMuestra')}
+                    placeholder={'Nueva muestra'}
+                />
+            ),
+        },
+        
+        {
+            title: 'Detalles',
+            key: 'detalles',
+            render: (_, record) => (
+                <Button onClick={() => showModal(record)}>Ver Detalles</Button>
+            ),
+        }
+
+    ]).map(col => ({
+        ...col,
+        onHeaderCell: () => ({
+            style: { backgroundColor: '#f0f2f5' }
+        }),
+    }));
+
+    const columns2 = () => ([
+        {
+            title: 'Venta a nombre',
+            dataIndex: 'vNombre',
+            key: 'vNombre',
+        },
         {
             title: 'Peso bruto',
             dataIndex: 'pBruto',
@@ -370,6 +528,18 @@ function TableComponent() {
     return (
         <div className='Table'>
             <Table dataSource={dataSource} columns={columns()} pagination={false} />
+            <Modal title="Detalles de la fila" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+                <table className='table'>
+                    <tbody>
+                        {columns2().map(column => (
+                            <tr key={column.key}>
+                                <th>{column.title}</th>
+                                <td>{selectedRowDetails ? selectedRowDetails[column.dataIndex] : ''}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Modal>
         </div>
     );
 }
