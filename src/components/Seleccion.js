@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Select } from 'antd';
 
-const Seleccion = ({ estadoInicial, onEstadoChange, recordKey, naranja }) => {
+const Seleccion = ({ estadoInicial, onEstadoChange, recordKey, naranja, tipo }) => {
     const [estado, setEstado] = useState(estadoInicial);
     const [estadoPrevio, setEstadoPrevio] = useState(null);
 
@@ -20,10 +20,10 @@ const Seleccion = ({ estadoInicial, onEstadoChange, recordKey, naranja }) => {
         'Vehículo pesado': ['Vehículo descargado', 'Pedido finalizado', 'Pedido con Permiso descarga'],
     }
 
-    const opcionSiguiente = estadoSiguiente[estado] || [];
+    let opcionSiguiente = estadoSiguiente[estado] || [];
 
     if (!opcionSiguiente.includes('Incidencia')) {
-        opcionSiguiente.push('Incidencia');
+        opcionSiguiente = [...opcionSiguiente, 'Incidencia'];
     }
 
     const handleChange = (value) => {
@@ -37,8 +37,12 @@ const Seleccion = ({ estadoInicial, onEstadoChange, recordKey, naranja }) => {
         onEstadoChange(recordKey, value);
     };
 
-    const getSelectStatusClass = (estado) => {
-        if (estado === 'Incidencia') {
+    const getSelectStatusClass = (estado, tipo) => {
+        if (tipo === 2 && estado === 'Muestra tomada') {
+            return 'selectAmarillo';
+        } else if (tipo === 1 && estado === 'Camión sin llegar') {
+            return 'selectAmarillo';
+        } else if (estado === 'Incidencia') {
             return 'selectRojo';
         } else if (naranja.includes(estado)) {
             return 'selectNaranja';
@@ -47,14 +51,14 @@ const Seleccion = ({ estadoInicial, onEstadoChange, recordKey, naranja }) => {
     };
 
     if (estado === 'Incidencia' && estadoPrevio && !opcionSiguiente.includes(estadoPrevio)) {
-        opcionSiguiente.push(estadoPrevio);
+        opcionSiguiente = [...opcionSiguiente, estadoPrevio];
     }
 
     return (
         <Select
             value={estado}
             onChange={handleChange}
-            className={getSelectStatusClass(estado)}
+            className={getSelectStatusClass(estado, tipo)}
             style={{ width: '100%' }}
         >
             {opcionSiguiente.map((siguienteEstado) => (

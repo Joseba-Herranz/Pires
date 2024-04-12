@@ -85,7 +85,7 @@ function TableComponent() {
   const [selectedRowDetails, setSelectedRowDetails] = useState(null);
   const [text, setText] = useState('');
 
-  const naranja = ["Camión sin llegar", "Vehículo descargado", "Vehículo pesado"];
+  const naranja = ["Vehículo descargado", "Vehículo pesado"];
 
   const showModal = (record) => {
     setSelectedRowDetails(record);
@@ -212,6 +212,7 @@ function TableComponent() {
           onEstadoChange={handleChange}
           recordKey={record.key}
           naranja={naranja}
+          tipo={1}
         />
       ),
     },

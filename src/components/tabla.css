@@ -27,12 +27,16 @@
     background-color: red !important; 
 }
 
-.selectNaranja.ant-select-open .ant-select-selector,
+.selectAmarillo .ant-select-selector {
+    background-color: yellow !important;
+}
+
+/* .selectNaranja.ant-select-open .ant-select-selector,
 .selectNaranja.ant-select-focused .ant-select-selector,
 .selectRojo.ant-select-open .ant-select-selector,
 .selectRojo.ant-select-focused .ant-select-selector {
     background-color: inherit !important;
-}
+} */
 
 
 .ant-checkbox-wrapper-checked .ant-checkbox-inner {
@@ -44,3 +48,6 @@
 .ant-checkbox-checked .ant-checkbox-inner::after {
     border-color: #1d1d1d; 
 }
+
+
+

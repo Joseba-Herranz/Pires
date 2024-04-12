@@ -2,86 +2,16 @@ import React, { useState } from 'react';
 import { Table, Select, Input, Modal, Button, Checkbox } from 'antd';
 import Seleccion from './Seleccion';
 import Escribir from './Escribir';
+import DescLab from './DescLab';
 //import 'antd/dist/antd.css';
 import './tabla.css';
-
-// const Escribir = ({ onChange, value, placeholder }) => {
-//     return <Input value={value} onChange={onChange} placeholder={placeholder} />;
-// };
-
-// const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
-//     const [estado, setEstado] = useState(estadoInicial);
-//     const [estadoPrevio, setEstadoPrevio] = useState(null);
-
-//     const naranja = ['Muestra enviada a Laboratorio', 'Muestra Recibida', 'Muestra en análisis', 'Pendiente descarga'];
-
-//     const estadoSiguiente = {
-//         'Camión sin llegar': ['Camión pesada inicial'],
-//         'Camión pesada inicial': ['Camión sin llegar', 'Aviso a conductor para toma de muestra'],
-//         'Aviso a conductor para toma de muestra': ['Camión pesada inicial', 'Muestra tomada'],
-//         'Muestra tomada': ['Aviso a conductor para toma de muestra', 'Muestra enviada a Laboratorio'],
-//         'Muestra enviada a Laboratorio': ['Muestra tomada', 'Muestra Recibida por el laboratorio'],
-//         'Muestra Recibida por el laboratorio': ['Muestra enviada a Laboratorio', 'Muestra en análisis'],
-//         'Muestra en análisis': ['Muestra Recibida por el laboratorio', 'Muestra analizada'],
-//         'Muestra analizada': ['Muestra en análisis', 'Pedido con Permiso descarga'],
-//         'Pedido con Permiso descarga': ['Muestra analizada', 'Aviso a conductor para ir a descargar'],
-//         'Aviso a conductor para ir a descargar': ['Pedido con Permiso descarga', 'Vehículo descargado'],
-//         'Vehículo descargado': ['Aviso a conductor para ir a descargar', 'Vehículo pesado'],
-//         'Vehículo pesado': ['Vehículo descargado', 'Pedido finalizado', 'Pedido con Permiso descarga'],
-//     }
-
-//     const opcionSiguiente = estadoSiguiente[estado] || [];
-
-//     if (!opcionSiguiente.includes('Incidencia')) {
-//         opcionSiguiente.push('Incidencia');
-//     }
-
-//     const handleChange = (value) => {
-//         if (value === 'Incidencia' && estado !== 'Incidencia') {
-//             setEstadoPrevio(estado);
-//         } else if (estado === 'Incidencia' && value !== 'Incidencia') {
-//             setEstadoPrevio(null);
-//         }
-
-//         setEstado(value);
-//         onEstadoChange(recordKey, value);
-//     };
-
-//     const getSelectStatusClass = (estado) => {
-//         if (estado === 'Incidencia') {
-//             return 'selectRojo';
-//         } else if (naranja.includes(estado)) {
-//             return 'selectNaranja';
-//         }
-//         return '';
-//     };
-
-//     if (estado === 'Incidencia' && estadoPrevio && !opcionSiguiente.includes(estadoPrevio)) {
-//         opcionSiguiente.push(estadoPrevio);
-//     }
-
-//     return (
-//         <Select
-//             value={estado}
-//             onChange={handleChange}
-//             className={getSelectStatusClass(estado)}
-//             style={{ width: '100%' }}
-//         >
-//             {opcionSiguiente.map((siguienteEstado) => (
-//                 <Select.Option key={siguienteEstado} value={siguienteEstado}>
-//                     {siguienteEstado}
-//                 </Select.Option>
-//             ))}
-//         </Select>
-//     );
-// };
 
 function TableComponent() {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRowDetails, setSelectedRowDetails] = useState(null);
     const [text, setText] = useState('');
-    const naranja = ['Muestra enviada a Laboratorio', 'Muestra Recibida', 'Muestra en análisis', 'Pendiente descarga'];
+    const naranja = ['Muestra enviada a Laboratorio', 'Muestra Recibida por el laboratorio', 'Muestra en análisis', 'Pendiente descarga'];
 
     const showModal = (record) => {
         setSelectedRowDetails(record);
@@ -193,7 +123,7 @@ function TableComponent() {
             nuevaMuestra: '',
             muestrasProporcionadas: '',
             hModificacion: '10:15',
-            estado: 'Camión sin llegar',
+            estado: 'Muestra tomada',
             obsvDescargador: '',
             obsvLaboratorio: '',
         },
@@ -223,7 +153,7 @@ function TableComponent() {
 
     const columns = () => ([
         {
-            title: 'Venta a nombre',
+            title: 'Nº Pedido',
             dataIndex: 'vNombre',
             key: 'vNombre',
         },
@@ -232,7 +162,7 @@ function TableComponent() {
         //     dataIndex: 'pBruto',
         //     key: 'pBruto',
         // },
-        
+
         // {
         //     title: 'Nº Bultos',
         //     dataIndex: 'nBultos',
@@ -282,8 +212,8 @@ function TableComponent() {
         //     dataIndex: 'bultos',
         //     key: 'bultos',
         // },
-        
-        
+
+
         {
             title: 'Observaciones descargador',
             dataIndex: 'obsDescargador',
@@ -323,6 +253,7 @@ function TableComponent() {
                     onEstadoChange={handleChange}
                     recordKey={record.key}
                     naranja={naranja}
+                    tipo={2}
                 />
 
             ),
@@ -332,11 +263,7 @@ function TableComponent() {
             dataIndex: 'pDescargaLab',
             key: 'pDescargaLab',
             render: (_, record) => (
-                <Escribir
-                    value={record.pDescargaLab}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'pDescargaLab')}
-                    placeholder={'Punto de Descarga'}
-                />
+                <DescLab></DescLab>
             ),
         },
         {
@@ -363,7 +290,7 @@ function TableComponent() {
                 />
             ),
         },
-        
+
         {
             title: 'Detalles',
             key: 'detalles',
@@ -381,7 +308,7 @@ function TableComponent() {
 
     const columns2 = () => ([
         {
-            title: 'Venta a nombre',
+            title: 'Nº Pedido',
             dataIndex: 'vNombre',
             key: 'vNombre',
         },
@@ -408,11 +335,11 @@ function TableComponent() {
                 <Checkbox checked={record.envasado} onChange={(e) => handleCheck(e, record.key)} />
             ),
         },
-        {
-            title: 'Tipo',
-            dataIndex: 'tipo',
-            key: 'tipo',
-        },
+        // {
+        //     title: 'Tipo',
+        //     dataIndex: 'tipo',
+        //     key: 'tipo',
+        // },
         {
             title: 'Descripción',
             dataIndex: 'descripcion',
@@ -534,7 +461,7 @@ function TableComponent() {
                         {columns2().map(column => (
                             <tr key={column.key}>
                                 <th>{column.title}</th>
-                                <td>{selectedRowDetails ? selectedRowDetails[column.dataIndex] : ''}</td>
+                                <td>{selectedRowDetails && selectedRowDetails[column.dataIndex] ? selectedRowDetails[column.dataIndex] : 'Ninguna'}</td>
                             </tr>
                         ))}
                     </tbody>

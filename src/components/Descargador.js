@@ -5,82 +5,11 @@ import Escribir from './Escribir';
 //import 'antd/dist/antd.css';
 import './tabla.css';
 
-// const Escribir = ({ onChange, value, placeholder }) => {
-//     return <Input value={value} onChange={onChange} placeholder={placeholder} />;
-// };
-
-// const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
-//     const [estado, setEstado] = useState(estadoInicial);
-//     const [estadoPrevio, setEstadoPrevio] = useState(null);
-
-//     const naranja = ['Camión pesada inicial', 'Aviso a conductor para toma de muestra', 'Muestra tomada', 'Pedido con Permiso descarga'];
-
-//     const estadoSiguiente = {
-//         'Camión sin llegar': ['Camión pesada inicial'],
-//         'Camión pesada inicial': ['Camión sin llegar', 'Aviso a conductor para toma de muestra'],
-//         'Aviso a conductor para toma de muestra': ['Camión pesada inicial', 'Muestra tomada'],
-//         'Muestra tomada': ['Aviso a conductor para toma de muestra', 'Muestra enviada a Laboratorio'],
-//         'Muestra enviada a Laboratorio': ['Muestra tomada', 'Muestra Recibida por el laboratorio'],
-//         'Muestra Recibida por el laboratorio': ['Muestra enviada a Laboratorio', 'Muestra en análisis'],
-//         'Muestra en análisis': ['Muestra Recibida por el laboratorio', 'Muestra analizada'],
-//         'Muestra analizada': ['Muestra en análisis', 'Pedido con Permiso descarga'],
-//         'Pedido con Permiso descarga': ['Muestra analizada', 'Aviso a conductor para ir a descargar'],
-//         'Aviso a conductor para ir a descargar': ['Pedido con Permiso descarga', 'Vehículo descargado'],
-//         'Vehículo descargado': ['Aviso a conductor para ir a descargar', 'Vehículo pesado'],
-//         'Vehículo pesado': ['Vehículo descargado', 'Pedido finalizado', 'Pedido con Permiso descarga'],
-//     }
-
-//     const opcionSiguiente = estadoSiguiente[estado] || [];
-
-//     if (!opcionSiguiente.includes('Incidencia')) {
-//         opcionSiguiente.push('Incidencia');
-//     }
-
-//     const handleChange = (value) => {
-//         if (value === 'Incidencia' && estado !== 'Incidencia') {
-//             setEstadoPrevio(estado);
-//         } else if (estado === 'Incidencia' && value !== 'Incidencia') {
-//             setEstadoPrevio(null);
-//         }
-
-//         setEstado(value);
-//         onEstadoChange(recordKey, value);
-//     };
-
-//     const getSelectStatusClass = (estado) => {
-//         if (estado === 'Incidencia') {
-//             return 'selectRojo';
-//         } else if (naranja.includes(estado)) {
-//             return 'selectNaranja';
-//         }
-//         return '';
-//     };
-
-//     if (estado === 'Incidencia' && estadoPrevio && !opcionSiguiente.includes(estadoPrevio)) {
-//         opcionSiguiente.push(estadoPrevio);
-//     }
-
-//     return (
-//         <Select
-//             value={estado}
-//             onChange={handleChange}
-//             className={getSelectStatusClass(estado)}
-//             style={{ width: '100%' }}
-//         >
-//             {opcionSiguiente.map((siguienteEstado) => (
-//                 <Select.Option key={siguienteEstado} value={siguienteEstado}>
-//                     {siguienteEstado}
-//                 </Select.Option>
-//             ))}
-//         </Select>
-//     );
-// };
-
 function TableComponent() {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRowDetails, setSelectedRowDetails] = useState(null);
     const [text, setText] = useState('');
-    const naranja = ['Camión pesada inicial', 'Aviso a conductor para toma de muestra', 'Muestra tomada', 'Pedido con Permiso descarga'];
+    const naranja = ['Camión pesada inicial', 'Aviso a conductor para toma de muestra', 'Muestra tomada', 'Pedido con Permiso descarga', 'Aviso a conductor para ir a descargar'];
 
     const showModal = (record) => {
         setSelectedRowDetails(record);
@@ -143,6 +72,7 @@ function TableComponent() {
             descripcion: 'Acido',
             cAlmacen: '1030',
             cBascula: '15',
+            pMuestra: '1031',
             pDescarga: '1030',
             cPrevista: '15',
             estado: 'Camión pesada inicial',
@@ -162,6 +92,7 @@ function TableComponent() {
             descripcion: 'Acido',
             cAlmacen: '1030',
             cBascula: '20',
+            pMuestra: '1031',
             pDescarga: '1030',
             cPrevista: '20',
             estado: 'Aviso a conductor para toma de muestra',
@@ -181,6 +112,7 @@ function TableComponent() {
             descripcion: 'Acido',
             cAlmacen: '1030',
             cBascula: '25',
+            pMuestra: '1031',
             pDescarga: '1030',
             cPrevista: '25',
             estado: 'Muestra analizada',
@@ -249,7 +181,12 @@ function TableComponent() {
         //     key: 'cBascula'
         // },
         {
-            title: 'Punto de descarga',
+            title: 'Punto de muestra',
+            dataIndex: 'pMuestra',
+            key: 'pMuestra'
+        },
+        {
+            title: 'Punto de descarga laboratorio',
             dataIndex: 'pDescarga',
             key: 'pDescarga'
         },
@@ -258,7 +195,12 @@ function TableComponent() {
             dataIndex: 'cPrevista',
             key: 'cPrevista'
         },
-       
+        // {
+        //     title: 'Peso descargado en cada linea',
+        //     dataIndex: 'pDescargado',
+        //     key: 'pDescargado',
+
+        // },
         {
             title: 'Observaciones de laboratorio',
             dataIndex: 'obsvLaboratorio',
@@ -284,6 +226,7 @@ function TableComponent() {
                     onEstadoChange={handleChange}
                     recordKey={record.key}
                     naranja={naranja}
+                    tipo={0}
                 />
 
             ),
@@ -306,7 +249,7 @@ function TableComponent() {
             render: (_, record) => (
                 <Button onClick={() => showModal(record)}>Ver Detalles</Button>
             ),
-        }, 
+        },
     ]).map(col => ({
         ...col,
         onHeaderCell: () => ({
@@ -374,7 +317,7 @@ function TableComponent() {
             key: 'cBascula'
         },
         {
-            title: 'Punto de descarga',
+            title: 'Punto de descarga laboratorio',
             dataIndex: 'pDescarga',
             key: 'pDescarga'
         },
@@ -382,6 +325,12 @@ function TableComponent() {
             title: 'Cantidad prevista',
             dataIndex: 'cPrevista',
             key: 'cPrevista'
+        },
+        {
+            title: 'Peso descargado en cada linea',
+            dataIndex: 'pDescargado',
+            key: 'pDescargado',
+
         },
         {
             title: 'Estado',
@@ -437,18 +386,16 @@ function TableComponent() {
                         {columns2().map(column => (
                             <tr key={column.key}>
                                 <th>{column.title}</th>
-                                <td>{selectedRowDetails ? selectedRowDetails[column.dataIndex] : ''}</td>
+                                <td>{selectedRowDetails && selectedRowDetails[column.dataIndex] ? selectedRowDetails[column.dataIndex] : 'Ninguna'}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </Modal>
-            {/* <Modal title="Observaciones" visible={isObservacionesModalVisible} onOk={() => setIsObservacionesModalVisible(false)} onCancel={() => setIsObservacionesModalVisible(false)}>
-    <p>{selectedRowDetails?.obsvDescargador}</p>
-    <p>{selectedRowDetails?.obsvLaboratorio}</p> */}
-   
-{/* </Modal> */}
-
+            {/*<Modal title="Observaciones" visible={isObservacionesModalVisible} onOk={() => setIsObservacionesModalVisible(false)} onCancel={() => setIsObservacionesModalVisible(false)}>
+                <p>{selectedRowDetails?.obsvDescargador}</p>
+                <p>{selectedRowDetails?.obsvLaboratorio}</p> 
+            </Modal> */}
         </div>
     );
 }
