@@ -377,9 +377,27 @@ function TableComponent() {
         }),
     }));
 
+    const stateColorValue = {
+        "Incidencia": 0, 
+        'Camión pesada inicial': 1,
+        'Aviso a conductor para toma de muestra': 1,
+        'Muestra tomada': 1,
+        'Pedido con Permiso descarga': 1,
+        'Aviso a conductor para ir a descargar': 1,
+    };
+    
+    const sortedData = dataSource.sort((a, b) => {
+        const colorA = stateColorValue[a.estado] || 3;
+        const colorB = stateColorValue[b.estado] || 3;
+        if (colorA < colorB) return -1;
+        if (colorA > colorB) return 1;
+    
+        return new Date('1970/01/01 ' + a.hPesado) - new Date('1970/01/01 ' + b.hPesado);
+    });
+
     return (
         <div className='Table'>
-            <Table dataSource={dataSource} columns={columns()} pagination={false} />
+            <Table dataSource={sortedData} columns={columns()} pagination={false} />
             <Modal title="Detalles de la fila" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                 <table className='table'>
                     <tbody>

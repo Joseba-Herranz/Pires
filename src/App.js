@@ -48,7 +48,6 @@ const HeaderComponent = () => {
   );
 }
 
-
 function App() {
   return (
     <Router>

@@ -32,6 +32,7 @@ const DescLab = () => {
       <Select.Option value="Filtro/Inertizar">Filtro/Inertizar</Select.Option>
       <Select.Option value="Filtro/B4/Inertizar">Filtro/B4/Inertizar</Select.Option>
       <Select.Option value="B4/Inertizar">B4/Inertizar</Select.Option>
+      <Select.Option value="Otros">Otros</Select.Option>
     </Select>
   );
 }

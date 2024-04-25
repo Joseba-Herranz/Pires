@@ -1,83 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Select, Input, Modal, Button } from 'antd';
 import Seleccion from './Seleccion';
+import axios from 'axios';
 //import 'antd/dist/antd.css';
 import './tabla.css';
-
-
-
-// const Seleccion = ({ estadoInicial, onEstadoChange, recordKey }) => {
-//   const [estado, setEstado] = useState(estadoInicial);
-//   const [estadoPrevio, setEstadoPrevio] = useState(null);
-
-
-
-//   const estadoSiguiente = {
-//     'Camión sin llegar': ['Camión pesada inicial'],
-//     'Camión pesada inicial': ['Camión sin llegar', 'Aviso a conductor para toma de muestra'],
-//     'Aviso a conductor para toma de muestra': ['Camión pesada inicial', 'Muestra tomada'],
-//     'Muestra tomada': ['Aviso a conductor para toma de muestra', 'Muestra enviada a Laboratorio'],
-//     'Muestra enviada a Laboratorio': ['Muestra tomada', 'Muestra Recibida por el laboratorio'],
-//     'Muestra Recibida por el laboratorio': ['Muestra enviada a Laboratorio', 'Muestra en análisis'],
-//     'Muestra en análisis': ['Muestra Recibida por el laboratorio', 'Muestra analizada'],
-//     'Muestra analizada': ['Muestra en análisis', 'Pedido con Permiso descarga'],
-//     'Pedido con Permiso descarga': ['Muestra analizada', 'Aviso a conductor para ir a descargar'],
-//     'Aviso a conductor para ir a descargar': ['Pedido con Permiso descarga', 'Vehículo descargado'],
-//     'Vehículo descargado': ['Aviso a conductor para ir a descargar', 'Vehículo pesado'],
-//     'Vehículo pesado': ['Vehículo descargado', 'Pedido finalizado', 'Pedido con Permiso descarga'],
-//   }
-
-//   const opcionSiguiente = estadoSiguiente[estado] || [];
-
-//   if (!opcionSiguiente.includes('Incidencia')) {
-//     opcionSiguiente.push('Incidencia');
-//   }
-
-//   const handleChange = (value) => {
-//     if (value === 'Incidencia' && estado !== 'Incidencia') {
-//       setEstadoPrevio(estado);
-//     } else if (estado === 'Incidencia' && value !== 'Incidencia') {
-//       setEstadoPrevio(null);
-//     }
-
-//     setEstado(value);
-//     onEstadoChange(recordKey, value);
-//   };
-
-//   const getSelectStatusClass = (estado) => {
-//     if (estado === 'Incidencia') {
-//       return 'selectRojo';
-//     } else if (naranja.includes(estado)) {
-//       return 'selectNaranja';
-//     }
-//     return '';
-//   };
-
-//   if (estado === 'Incidencia' && estadoPrevio && !opcionSiguiente.includes(estadoPrevio)) {
-//     opcionSiguiente.push(estadoPrevio);
-//   }
-
-//   return (
-//     <Select
-//       value={estado}
-//       onChange={handleChange}
-//       className={getSelectStatusClass(estado)}
-//       style={{ width: '100%' }}
-//     >
-//       {opcionSiguiente.map((siguienteEstado) => (
-//         <Select.Option key={siguienteEstado} value={siguienteEstado}>
-//           {siguienteEstado}
-//         </Select.Option>
-//       ))}
-//     </Select>
-//   );
-// };
 
 const Escribir = ({ onChange, value }) => {
   return <Input placeholder="Observaciones" value={value} onChange={onChange} />;
 };
-
-
 
 function TableComponent() {
 
@@ -120,56 +50,84 @@ function TableComponent() {
     });
     setDataSource(newData);
   };
-  const [dataSource, setDataSource] = useState([
-    {
-      key: '4',
-      nPedido: '010104',
-      name: 'ALUDIUM',
-      hPesado: '12:00',
-      nMatricula: '4314RDC',
-      nomConductor: 'Juan',
-      observacionesTrans: '',
-      descripcion: 'Acido',
-      pDescarga: '1030',
-      cantidad: '20',
-      observacionesDesc: '',
-      observacionesLab: '',
-      observacionesBCD: '',
-      estado: 'Camión sin llegar',
-    },
-    {
-      key: '5',
-      nPedido: '010105',
-      name: 'ALUDIUM',
-      hPesado: '12:00',
-      nMatricula: '2234JPT',
-      nomConductor: 'Pepe',
-      observacionesTrans: '',
-      descripcion: 'Acido',
-      pDescarga: '1030',
-      cantidad: '20',
-      observacionesDesc: '',
-      observacionesLab: '',
-      observacionesBCD: '',
-      estado: 'Vehículo descargado',
-    },
-    {
-      key: '6',
-      nPedido: '010106',
-      name: 'ALUDIUM',
-      hPesado: '12:00',
-      nMatricula: '2052JUN',
-      nomConductor: 'Francisco',
-      observacionesTrans: '',
-      descripcion: 'Acido',
-      pDescarga: '1030',
-      cantidad: '20',
-      observacionesDesc: '',
-      observacionesLab: '',
-      observacionesBCD: '',
-      estado: 'Muestra analizada',
-    },
-  ]);
+  // const [dataSource, setDataSource] = useState([
+  //   {
+  //     key: '4',
+  //     nPedido: '010104',
+  //     name: 'ALUDIUM',
+  //     hPesado: '12:00',
+  //     nMatricula: '4314RDC',
+  //     nomConductor: 'Juan',
+  //     observacionesTrans: '',
+  //     descripcion: 'Acido',
+  //     pDescarga: '1030',
+  //     cantidad: '20',
+  //     observacionesDesc: '',
+  //     observacionesLab: '',
+  //     observacionesBCD: '',
+  //     estado: 'Camión sin llegar',
+  //   },
+  //   {
+  //     key: '5',
+  //     nPedido: '010105',
+  //     name: 'ALUDIUM',
+  //     hPesado: '12:00',
+  //     nMatricula: '2234JPT',
+  //     nomConductor: 'Pepe',
+  //     observacionesTrans: '',
+  //     descripcion: 'Acido',
+  //     pDescarga: '1030',
+  //     cantidad: '20',
+  //     observacionesDesc: '',
+  //     observacionesLab: '',
+  //     observacionesBCD: '',
+  //     estado: 'Vehículo descargado',
+  //   },
+  //   {
+  //     key: '6',
+  //     nPedido: '010106',
+  //     name: 'ALUDIUM',
+  //     hPesado: '12:00',
+  //     nMatricula: '2052JUN',
+  //     nomConductor: 'Francisco',
+  //     observacionesTrans: '',
+  //     descripcion: 'Acido',
+  //     pDescarga: '1030',
+  //     cantidad: '20',
+  //     observacionesDesc: '',
+  //     observacionesLab: '',
+  //     observacionesBCD: '',
+  //     estado: 'Muestra analizada',
+  //   },
+  // ]);
+
+  const [dataSource, setDataSource] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
+    .then(response => {
+        console.log(response.data); 
+        const dataSource = response.data.cabeza.map(item => ({
+                key: item.id.toString(),
+                nPedido: item.id_navision,
+                name: item.name,
+                hPesado: item.hPesado,
+                nMatricula: item.n_matricula,
+                nomConductor: item.nomConductor,
+                observacionesTrans: item.observacionesTrans || '',
+                descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
+                pDescarga: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
+                cantidad: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad : '',
+                observacionesDesc: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesDesc : '',
+                observacionesLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesLab : '',
+                observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesBCD : '',
+                estado: item.lineas && item.lineas.length > 0 ? item.lineas[0].estado : '',
+            }));
+            console.log(dataSource);
+            setDataSource(dataSource); 
+        })
+        .catch(error => console.error('There was an error getting the data:', error));
+}, []);
 
   const columns = () => ([
     {
@@ -242,9 +200,26 @@ function TableComponent() {
     }),
   }));
 
+  const stateColorValue = {
+    "Incidencia": 0,
+    "Vehículo descargado": 1, 
+    "Vehículo pesado": 1,
+    "Camion sin llegar": 2,
+  };
+
+  const sortedData = dataSource.sort((a, b) => {
+
+    const colorA = stateColorValue[a.estado] || 3;
+    const colorB = stateColorValue[b.estado] || 3;
+    if (colorA < colorB) return -1;
+    if (colorA > colorB) return 1;
+
+    return new Date('1970/01/01 ' + a.hPesado) - new Date('1970/01/01 ' + b.hPesado);
+  });
+
   return (
     <div className="Table">
-      <Table dataSource={dataSource} columns={columns()} pagination={false} />
+      <Table dataSource={sortedData} columns={columns()} pagination={false} />
       <Modal title="Detalles de la fila" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <table className='table'>
           <tbody>
@@ -253,7 +228,7 @@ function TableComponent() {
               <td>{selectedRowDetails?.nPedido}</td>
             </tr>
             <tr>
-              <th>Nombre del Cliente</th>
+              <th>Venta a Nombre</th>
               <td>{selectedRowDetails?.name}</td>
             </tr>
             <tr>
