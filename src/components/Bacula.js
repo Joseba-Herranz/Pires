@@ -3,6 +3,8 @@ import { Table, Select, Input, Modal, Button } from 'antd';
 import Seleccion from './Seleccion';
 import axios from 'axios';
 //import 'antd/dist/antd.css';
+import moment from 'moment';
+import 'moment/locale/es';
 import './tabla.css';
 
 const Escribir = ({ onChange, value }) => {
@@ -110,10 +112,10 @@ function TableComponent() {
         const dataSource = response.data.cabeza.map(item => ({
                 key: item.id.toString(),
                 nPedido: item.id_navision,
-                name: item.name,
-                hPesado: item.hPesado,
+                name: item.venta_nombre,
+                hPesado: moment(item.hora_pesado_bruto).format('HH:mm'),
                 nMatricula: item.n_matricula,
-                nomConductor: item.nomConductor,
+                nomConductor: item.nombre_conductor,
                 observacionesTrans: item.observacionesTrans || '',
                 descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
                 pDescarga: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
@@ -121,7 +123,7 @@ function TableComponent() {
                 observacionesDesc: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesDesc : '',
                 observacionesLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesLab : '',
                 observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesBCD : '',
-                estado: item.lineas && item.lineas.length > 0 ? item.lineas[0].estado : '',
+                estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
             }));
             console.log(dataSource);
             setDataSource(dataSource); 
@@ -201,16 +203,16 @@ function TableComponent() {
   }));
 
   const stateColorValue = {
-    "Incidencia": 0,
-    "Vehículo descargado": 1, 
-    "Vehículo pesado": 1,
-    "Camion sin llegar": 2,
+    "Incidencia": 1,
+    "Vehículo descargado": 2, 
+    "Vehículo pesado": 2,
+    "Camion sin llegar": 3,
   };
 
   const sortedData = dataSource.sort((a, b) => {
 
-    const colorA = stateColorValue[a.estado] || 3;
-    const colorB = stateColorValue[b.estado] || 3;
+    const colorA = stateColorValue[a.estado] || 4;
+    const colorB = stateColorValue[b.estado] || 4;
     if (colorA < colorB) return -1;
     if (colorA > colorB) return 1;
 

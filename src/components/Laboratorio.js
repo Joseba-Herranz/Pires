@@ -4,6 +4,8 @@ import Seleccion from './Seleccion';
 import Escribir from './Escribir';
 import DescLab from './DescLab';
 
+import moment from 'moment';
+import 'moment/locale/es';
 import axios from 'axios';
 //import 'antd/dist/antd.css';
 import './tabla.css';
@@ -163,6 +165,7 @@ function TableComponent() {
             const dataSource = response.data.cabeza.map(item => ({
                 key: item.id.toString(),
                 vNombre: item.id_navision,
+                hPesado: moment(item.hora_pesado_bruto).format('HH:mm'),
                 pBruto: item.peso_bruto,
                 pNeto: (item.peso_bruto - item.peso_tara),
                 nBultos: item.n_bulto,
@@ -178,7 +181,7 @@ function TableComponent() {
                 nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
                 muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
                 hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
-                estado: item.lineas && item.lineas.length > 0 ? item.lineas[0].estado || 'No state' : 'No state',
+                estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
                 obsvDescargador: '', 
                 obsvLaboratorio: '', 
             }));
@@ -330,7 +333,6 @@ function TableComponent() {
                 />
             ),
         },
-
         {
             title: 'Detalles',
             key: 'detalles',
@@ -493,32 +495,30 @@ function TableComponent() {
     }));
 
     const stateColorValue = {
-        "Incidencia": 0, 
-        'Muestra enviada a Laboratorio': 1, 
-        'Muestra Recibida por el laboratorio': 1, 
-        'Muestra en análisis': 1, 
-        'Pendiente descarga': 1,
-        'Muestra tomada': 2,
+        "Incidencia": 1, 
+        'Muestra enviada a Laboratorio': 2, 
+        'Muestra Recibida por el laboratorio': 2, 
+        'Muestra en análisis': 2, 
+        'Pendiente descarga': 2,
+        'Muestra tomada': 3,
     };
 
     const sortedData = dataSource.sort((a, b) => {
 
-        const colorA = stateColorValue[a.estado] || 3;
-        const colorB = stateColorValue[b.estado] || 3;
+        const colorA = stateColorValue[a.estado] || 4;
+        const colorB = stateColorValue[b.estado] || 4;
         if (colorA < colorB) return -1;
         if (colorA > colorB) return 1;
 
-        // If 'estado' is the same for both records, sort by another field (e.g., 'vNombre').
         if (colorA === colorB) {
             return a.vNombre.localeCompare(b.vNombre);
         }
         
-        // If 'hModificacion' is not set or not in a date format for both records, sort by order in data source.
-        if (!a.hModificacion || !b.hModificacion) {
+        if (!a.hPesado || !b.hPesado) {
             return 0;
     }
     
-        return new Date('1970/01/01 ' + a.hModificacion) - new Date('1970/01/01 ' + b.hModificacion);
+        return new Date('1970/01/01 ' + a.hPesado) - new Date('1970/01/01 ' + b.hPesado);
     });
 
     return (
