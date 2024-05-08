@@ -43,15 +43,60 @@ function TableComponent() {
     });
     setDataSource(newData);
   };
-  const handleObservacionesChange = (key, newObservaciones) => {
-    const newData = dataSource.map(item => {
-      if (item.key === key) {
-        return { ...item, observacionesBCD: newObservaciones };
-      }
-      return item;
-    });
-    setDataSource(newData);
+  // const handleObservacionesChange = (key, newObservaciones) => {
+  //   const newData = dataSource.map(item => {
+  //     if (item.key === key) {
+  //       return { ...item, observacionesBCD: newObservaciones };
+  //     }
+  //     return item;
+  //   });
+  //   setDataSource(newData);
+  // };
+
+  const [observacionInput, setObservacionInput] = useState({});
+
+  const handleObservacionesChange = (id, event) => {
+    setObservacionInput({ ...observacionInput, [id]: event.target.value });
+    console.log("handleObservacionesChange:", id, event.target.value);
   };
+
+  const handleObservacionesBlur = (id) => {
+    console.log("handleObservacionesBlur:", id);
+    const updatedObservation = { "observaciones_bascula_camion_descarga": observacionInput[id] };
+
+    axios({
+      method: 'put',
+      url: `http://52.214.60.157:8080/api/linea/${id}`,
+      headers: { 'Content-Type': 'application/json' },
+      data: updatedObservation,
+    })
+      .then(response => {
+        console.log(response.data);
+
+        const index = dataSource.findIndex((item) => item.id_item === id);
+
+        setDataSource(prevState => ([
+          ...prevState.slice(0, index),
+          {
+            ...prevState[index],
+            observacionesBCD: observacionInput[id]
+          },
+          ...prevState.slice(index + 1)
+        ]));
+
+        loadData();
+      })
+      .catch(error => {
+        console.log(error);
+      });
+
+    setObservacionInput(prevState => {
+      const newState = { ...prevState };
+      delete newState[id];
+      return newState;
+    });
+  };
+
   // const [dataSource, setDataSource] = useState([
   //   {
   //     key: '4',
@@ -105,31 +150,36 @@ function TableComponent() {
 
   const [dataSource, setDataSource] = useState([]);
 
-  useEffect(() => {
+  const loadData = () => {
     axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
-    .then(response => {
-        console.log(response.data); 
+      .then(response => {
+        console.log(response.data);
         const dataSource = response.data.cabeza.map(item => ({
-                key: item.id.toString(),
-                nPedido: item.id_navision,
-                name: item.venta_nombre,
-                hPesado: moment(item.hora_pesado_bruto).format('HH:mm'),
-                nMatricula: item.n_matricula,
-                nomConductor: item.nombre_conductor,
-                observacionesTrans: item.observacionesTrans || '',
-                descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
-                pDescarga: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
-                cantidad: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad : '',
-                observacionesDesc: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesDesc : '',
-                observacionesLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesLab : '',
-                observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesBCD : '',
-                estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
-            }));
-            console.log(dataSource);
-            setDataSource(dataSource); 
-        })
-        .catch(error => console.error('There was an error getting the data:', error));
-}, []);
+          key: item.id.toString(),
+          id_item: item.lineas && item.lineas.length > 0 ? item.lineas[0].id : '',
+          nPedido: item.id_navision,
+          name: item.venta_nombre,
+          hPesado: moment(item.hora_pesado_bruto).format(' h:mm:ss'),
+          pBruto: item.peso_bruto,
+          nMatricula: item.n_matricula,
+          nomConductor: item.nombre_conductor,
+          observacionesTrans: item.observacionesTrans || '',
+          descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
+          pDescarga: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
+          cantidad: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad : '',
+          observacionesDesc: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesDesc : '',
+          observacionesLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
+          observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
+          estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
+        }));
+        console.log(dataSource);
+        setDataSource(dataSource);
+      })
+      .catch(error => console.error('There was an error getting the data:', error));
+  }
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const columns = () => ([
     {
@@ -182,8 +232,13 @@ function TableComponent() {
       key: 'observacionesBCD',
       render: (_, record) => (
         <Escribir
-          value={record.observacionesBCD}
-          onChange={e => handleObservacionesChange(record.key, e.target.value)}
+          // value={record.observacionesBCD}
+          // onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCD')}
+          // placeholder={'Observaciones'}
+          value={observacionInput[record.id_item] || record.observacionesBCD}
+          onChange={e => handleObservacionesChange(record.id_item, e)}
+          onBlur={() => handleObservacionesBlur(record.id_item)}
+          placeholder={'Observaciones'}
         />
       ),
     },
@@ -204,7 +259,7 @@ function TableComponent() {
 
   const stateColorValue = {
     "Incidencia": 1,
-    "Vehículo descargado": 2, 
+    "Vehículo descargado": 2,
     "Vehículo pesado": 2,
     "Camion sin llegar": 3,
   };
@@ -216,12 +271,14 @@ function TableComponent() {
     if (colorA < colorB) return -1;
     if (colorA > colorB) return 1;
 
-    return new Date('1970/01/01 ' + a.hPesado) - new Date('1970/01/01 ' + b.hPesado);
+    const dateA = moment(a.hPesado, ' h:mm:ss a');
+    const dateB = moment(b.hPesado, ' h:mm:ss a');
+    return dateA - dateB;
   });
 
   return (
     <div className="Table">
-      <Table dataSource={sortedData} columns={columns()} pagination={false} />
+      <Table dataSource={sortedData} columns={columns()} pagination={false} style={{ padding: "10px" }} />
       <Modal title="Detalles de la fila" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <table className='table'>
           <tbody>
@@ -263,11 +320,11 @@ function TableComponent() {
             </tr>
             <tr>
               <th>Observaciones de descarga </th>
-              <td>{selectedRowDetails?.observacionesBCD || 'Ninguna'}</td>
+              <td>{selectedRowDetails?.observacionesDesc || 'Ninguna'}</td>
             </tr>
             <tr>
               <th>Observaciones de laboratorio</th>
-              <td>{selectedRowDetails?.observacionesBCD || 'Ninguna'}</td>
+              <td>{selectedRowDetails?.observacionesLab || 'Ninguna'}</td>
             </tr>
             <tr>
               <th>Estado</th>

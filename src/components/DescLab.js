@@ -10,6 +10,7 @@ const DescLab = () => {
 
   return (
     <Select
+      style={{ width: 200 }}
       value={selectedOption}
       onChange={handleChange}
       placeholder="Por favor selecciona una opción"

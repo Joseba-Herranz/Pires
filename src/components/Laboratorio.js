@@ -42,15 +42,50 @@ function TableComponent() {
         setDataSource(newData);
     };
 
-    const handleObservacionesChange = (key, newObservaciones, field) => {
-        const newData = dataSource.map(item => {
-            if (item.key === key) {
-                return { ...item, [field]: newObservaciones };
-            }
-            return item;
-        });
-        setDataSource(newData);
+    const [observacionInput, setObservacionInput] = useState({});
+
+    const handleObservacionesChange = (id, event) => {
+        setObservacionInput({ ...observacionInput, [id]: event.target.value });
+        console.log("handleObservacionesChange:", id, event.target.value);
     };
+
+    const handleObservacionesBlur = (id) => {
+        console.log("handleObservacionesBlur:", id);
+        const updatedObservation = { "observaciones_laboratorio_bascula": observacionInput[id] };
+
+        axios({
+            method: 'put',
+            url: `http://52.214.60.157:8080/api/linea/${id}`,
+            headers: { 'Content-Type': 'application/json' },
+            data: updatedObservation,
+        })
+            .then(response => {
+                console.log(response.data);
+
+                const index = dataSource.findIndex((item) => item.id_item === id);
+
+                setDataSource(prevState => ([
+                    ...prevState.slice(0, index),
+                    {
+                        ...prevState[index],
+                        observacionesBCD: observacionInput[id]
+                    },
+                    ...prevState.slice(index + 1)
+                ]));
+
+                loadData();
+            })
+            .catch(error => {
+                console.log(error);
+            });
+
+        setObservacionInput(prevState => {
+            const newState = { ...prevState };
+            delete newState[id];
+            return newState;
+        });
+    };
+
 
     const handleCheck = (e, key) => {
         const checked = e.target.checked;
@@ -64,8 +99,54 @@ function TableComponent() {
         );
     };
 
-    
 
+    const traductor = (punto) => {
+        // if (punto === 'ENVASES') {
+        //     return 'Materia prima';
+        // } else {
+        const tipoAlmacen = punto.substr(0, 2);
+        const ubicacionAlmacen = punto.substr(2, 2);
+        if (tipoAlmacen === '10') {
+            if (ubicacionAlmacen === '10' || ubicacionAlmacen === '11') {
+                return 'Filtro';
+            }
+            else if (ubicacionAlmacen === '20' || ubicacionAlmacen === '21') {
+                return 'Acumulador';
+            }
+            else if (ubicacionAlmacen === '30' || ubicacionAlmacen === '31') {
+                return 'DAF';
+            }
+            else if (ubicacionAlmacen === '40' || ubicacionAlmacen === '41') {
+                return 'Torre';
+            }
+            else if (ubicacionAlmacen === '50' || ubicacionAlmacen === '51') {
+                return 'Destruir';
+            }
+            else if (ubicacionAlmacen === '60' || ubicacionAlmacen === '61') {
+                return 'Fabricar';
+            }
+            else if (ubicacionAlmacen === '70' || ubicacionAlmacen === '71') {
+                return 'Férrico';
+            }
+            else if (ubicacionAlmacen === '80' || ubicacionAlmacen === '81') {
+                return 'A destruir o filtro con Cal, ITP';
+            }
+            else if (ubicacionAlmacen === '90' || ubicacionAlmacen === '91') {
+                return 'Destruir (Cromo) o filtro con ferroso';
+            }
+        } else if (tipoAlmacen === '20') {
+            return 'Inertizar';
+        } else if (tipoAlmacen === '30') {
+            if (ubicacionAlmacen === '10') {
+                return 'B4';
+            } else {
+                return 'B7';
+            }
+        } else if (tipoAlmacen === '40') {
+            return 'Carpa';
+        }
+
+    };
 
     const [dataSource, setDataSource] = useState([
         // {
@@ -82,7 +163,7 @@ function TableComponent() {
         //     tBulto: '20010',
         //     bultos: '4',
         //     pDescargaLab: '',
-        //     observacionesBCO: '',
+        //     observacionesBCD: '',
         //     nuevaMuestra: '',
         //     muestrasProporcionadas: '',
         //     hModificacion: '08:30',
@@ -104,7 +185,7 @@ function TableComponent() {
         //     tBulto: '20010',
         //     bultos: '5',
         //     pDescargaLab: '',
-        //     observacionesBCO: '',
+        //     observacionesBCD: '',
         //     nuevaMuestra: '',
         //     muestrasProporcionadas: '',
         //     hModificacion: '09:40',
@@ -126,7 +207,7 @@ function TableComponent() {
         //     tBulto: '20010',
         //     bultos: '6',
         //     pDescargaLab: '',
-        //     observacionesBCO: '',
+        //     observacionesBCD: '',
         //     nuevaMuestra: '',
         //     muestrasProporcionadas: '',
         //     hModificacion: '10:15',
@@ -148,7 +229,7 @@ function TableComponent() {
         //     tBulto: '20010',
         //     bultos: '5',
         //     pDescargaLab: '',
-        //     observacionesBCO: '',
+        //     observacionesBCD: '',
         //     nuevaMuestra: '',
         //     muestrasProporcionadas: '',
         //     hModificacion: '10:00',
@@ -157,41 +238,79 @@ function TableComponent() {
         //     obsvLaboratorio: '',
         // },
     ]);
-
-    useEffect(() => {
+    const loadData = () => {
         axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
-        .then(response => {
-            console.log(response.data); 
-            const dataSource = response.data.cabeza.map(item => ({
-                key: item.id.toString(),
-                vNombre: item.id_navision,
-                hPesado: moment(item.hora_pesado_bruto).format('HH:mm'),
-                pBruto: item.peso_bruto,
-                pNeto: (item.peso_bruto - item.peso_tara),
-                nBultos: item.n_bulto,
-                envasado: false,
-                tipo: item.lineas && item.lineas.length > 0 ? item.lineas[0].type : 'No type',
-                descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
-                cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
-                cantBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
-                tBulto: item.lineas && item.lineas.length > 0 ? item.lineas[0].tipo_bulto : '',
-                bultos: item.lineas && item.lineas.length > 0 ? item.lineas[0].bulto : '',
-                pDescargaLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].punto_descarga_laboratorio || '' : '',
-                observacionesBCO: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
-                nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
-                muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
-                hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
-                estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
-                obsvDescargador: '', 
-                obsvLaboratorio: '', 
-            }));
-            
-        
+            .then(response => {
+                console.log(response.data);
+                const dataSource = response.data.cabeza.map(item => ({
+                    key: item.id.toString(),
+                    id_item: item.lineas && item.lineas.length > 0 ? item.lineas[0].id : '',
+                    vNombre: item.id_navision,
+                    name: item.venta_nombre,
+                    hPesado: moment(item.hora_pesado_bruto).format(' h:mm:ss '),
+                    pBruto: item.peso_bruto,
+                    pNeto: (item.peso_bruto - item.peso_tara),
+                    nBultos: item.n_bulto,
+                    envasado: false,
+                    tipo: item.lineas && item.lineas.length > 0 ? item.lineas[0].type : 'No type',
+                    descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
+                    cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
+                    cantBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
+                    tBulto: item.lineas && item.lineas.length > 0 ? item.lineas[0].tipo_bulto : '',
+                    bultos: item.lineas && item.lineas.length > 0 ? item.lineas[0].bulto : '',
+                    pDescargaLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].punto_descarga_laboratorio || '' : '',
+                    //pDescargaLab: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
+                    observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
+                    nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
+                    muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
+                    hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
+                    estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
+                    obsDescargador: '',
+                    obsBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
+                }));
                 setDataSource(dataSource);
             })
             .catch(error => {
                 console.log(error);
             });
+
+    }
+    useEffect(() => {
+        // axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
+        //     .then(response => {
+        //         console.log(response.data);
+        //         const dataSource = response.data.cabeza.map(item => ({
+        //             key: item.id.toString(),
+        //             id_item: item.lineas && item.lineas.length > 0 ? item.lineas[0].id : '',
+        //             vNombre: item.id_navision,
+        //             name: item.venta_nombre,
+        //             hPesado: moment(item.hora_pesado_bruto).format(' DD/MM/YYYY, h:mm:ss a'),
+        //             pBruto: item.peso_bruto,
+        //             pNeto: (item.peso_bruto - item.peso_tara),
+        //             nBultos: item.n_bulto,
+        //             envasado: false,
+        //             tipo: item.lineas && item.lineas.length > 0 ? item.lineas[0].type : 'No type',
+        //             descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
+        //             cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
+        //             cantBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
+        //             tBulto: item.lineas && item.lineas.length > 0 ? item.lineas[0].tipo_bulto : '',
+        //             bultos: item.lineas && item.lineas.length > 0 ? item.lineas[0].bulto : '',
+        //             pDescargaLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].punto_descarga_laboratorio || '' : '',
+        //             //pDescargaLab: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
+        //             observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
+        //             nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
+        //             muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
+        //             hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
+        //             estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
+        //             obsDescargador: '',
+        //             obsBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
+        //         }));
+        //         setDataSource(dataSource);
+        //     })
+        //     .catch(error => {
+        //         console.log(error);
+        //     });
+        loadData();
     }, []);
 
     const columns = () => ([
@@ -256,7 +375,6 @@ function TableComponent() {
         //     key: 'bultos',
         // },
 
-
         {
             title: 'Observaciones descargador',
             dataIndex: 'obsDescargador',
@@ -265,8 +383,8 @@ function TableComponent() {
         },
         {
             title: 'Observaciones bascula',
-            dataIndex: 'obsLaboratorio',
-            key: 'obsLaboratorio',
+            dataIndex: 'obsBascula',
+            key: 'obsBascula',
 
         },
         {
@@ -298,7 +416,6 @@ function TableComponent() {
                     naranja={naranja}
                     tipo={2}
                 />
-
             ),
         },
         {
@@ -311,12 +428,16 @@ function TableComponent() {
         },
         {
             title: 'Observaciones',
-            dataIndex: 'observacionesBCO',
-            key: 'observacionesBCO',
+            dataIndex: 'observacionesBCD',
+            key: 'observacionesBCD',
             render: (_, record) => (
                 <Escribir
-                    value={record.observacionesBCO}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCO')}
+                    // value={record.observacionesBCD}
+                    // onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCD')}
+                    // placeholder={'Observaciones'}
+                    value={observacionInput[record.id_item] || record.observacionesBCD}
+                    onChange={e => handleObservacionesChange(record.id_item, e)}
+                    onBlur={() => handleObservacionesBlur(record.id_item)}
                     placeholder={'Observaciones'}
                 />
             ),
@@ -353,6 +474,11 @@ function TableComponent() {
             title: 'Nº Pedido',
             dataIndex: 'vNombre',
             key: 'vNombre',
+        },
+        {
+            title: 'Venta a Nombre',
+            dataIndex: 'name',
+            key: 'name',
         },
         {
             title: 'Peso bruto',
@@ -434,30 +560,29 @@ function TableComponent() {
         },
         {
             title: 'Observaciones bascula',
-            dataIndex: 'obsLaboratorio',
-            key: 'obsLaboratorio',
-
+            dataIndex: 'obsBascula',
+            key: 'obsBascula',
         },
         {
             title: 'Punto de descarga laboratorio',
             dataIndex: 'pDescargaLab',
             key: 'pDescargaLab',
-            render: (_, record) => (
-                <Escribir
-                    value={record.pDescargaLab}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'pDescargaLab')}
-                    placeholder={'Punto de Descarga'}
-                />
-            ),
+            // render: (_, record) => (
+            //     <Escribir
+            //         value={record.pDescargaLab}
+            //         onChange={e => handleObservacionesChange(record.key, e.target.value, 'pDescargaLab')}
+            //         placeholder={'Punto de Descarga'}
+            //     />
+            // ),
         },
         {
             title: 'Observaciones',
-            dataIndex: 'observacionesBCO',
-            key: 'observacionesBCO',
+            dataIndex: 'observacionesBCD',
+            key: 'observacionesBCD',
             render: (_, record) => (
                 <Escribir
-                    value={record.observacionesBCO}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCO')}
+                    value={record.observacionesBCD}
+                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCD')}
                     placeholder={'Observaciones'}
                 />
             ),
@@ -495,10 +620,10 @@ function TableComponent() {
     }));
 
     const stateColorValue = {
-        "Incidencia": 1, 
-        'Muestra enviada a Laboratorio': 2, 
-        'Muestra Recibida por el laboratorio': 2, 
-        'Muestra en análisis': 2, 
+        "Incidencia": 1,
+        'Muestra enviada a Laboratorio': 2,
+        'Muestra Recibida por el laboratorio': 2,
+        'Muestra en análisis': 2,
         'Pendiente descarga': 2,
         'Muestra tomada': 3,
     };
@@ -510,20 +635,22 @@ function TableComponent() {
         if (colorA < colorB) return -1;
         if (colorA > colorB) return 1;
 
-        if (colorA === colorB) {
-            return a.vNombre.localeCompare(b.vNombre);
-        }
-        
-        if (!a.hPesado || !b.hPesado) {
-            return 0;
-    }
-    
-        return new Date('1970/01/01 ' + a.hPesado) - new Date('1970/01/01 ' + b.hPesado);
+        // if (colorA === colorB) {
+        //     return a.vNombre.localeCompare(b.vNombre);
+        // }
+
+        // if (!a.hPesado || !b.hPesado) {
+        //     return 0;
+        // }
+
+        const dateA = moment(a.hPesado, ' h:mm:ss ');
+        const dateB = moment(b.hPesado, ' h:mm:ss ');
+        return dateA - dateB;
     });
 
     return (
         <div className='Table'>
-            <Table dataSource={sortedData} columns={columns()} pagination={false} />
+            <Table dataSource={sortedData} columns={columns()} pagination={false} style={{ padding: "10px" }} />
             <Modal title="Detalles de la fila" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                 <table className='table'>
                     <tbody>

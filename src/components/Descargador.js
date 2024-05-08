@@ -62,6 +62,54 @@ function TableComponent() {
         );
     };
 
+    const traductor = (punto) => {
+        // if (punto === 'ENVASES') {
+        //     return 'Materia prima';
+        // } else {
+            const tipoAlmacen = punto.substr(0, 2);
+            const ubicacionAlmacen = punto.substr(2, 2);
+            if (tipoAlmacen === '10') {
+                if (ubicacionAlmacen === '10' || ubicacionAlmacen === '11') {
+                    return 'Filtro';
+                }
+                else if (ubicacionAlmacen === '20' || ubicacionAlmacen === '21') {
+                    return 'Acumulador';
+                }
+                else if (ubicacionAlmacen === '30' || ubicacionAlmacen === '31') {
+                    return 'DAF';
+                }
+                else if (ubicacionAlmacen === '40' || ubicacionAlmacen === '41') {
+                    return 'Torre';
+                }
+                else if (ubicacionAlmacen === '50' || ubicacionAlmacen === '51') {
+                    return 'Destruir';
+                }
+                else if (ubicacionAlmacen === '60' || ubicacionAlmacen === '61') {
+                    return 'Fabricar';
+                }
+                else if (ubicacionAlmacen === '70' || ubicacionAlmacen === '71') {
+                    return 'Férrico';
+                }
+                else if (ubicacionAlmacen === '80' || ubicacionAlmacen === '81') {
+                    return 'A destruir o filtro con Cal, ITP';
+                }
+                else if (ubicacionAlmacen === '90' || ubicacionAlmacen === '91') {
+                    return 'Destruir (Cromo) o filtro con ferroso';
+                }
+            } else if (tipoAlmacen === '20') {
+                return 'Inertizar';
+            } else if (tipoAlmacen === '30') {
+                if (ubicacionAlmacen === '10') {
+                    return 'B4';
+                } else {
+                    return 'B7';
+                }
+            } else if (tipoAlmacen === '40') {
+                return 'Carpa';
+            }
+        
+    };
+
     const [dataSource, setDataSource] = useState([
     //     {
     //         key: '1',
@@ -134,7 +182,7 @@ function TableComponent() {
                     nPedido: item.id_navision,
                     vNombre: item.venta_nombre,
                     fPedido: item.fecha_registro,
-                    hPesado: moment(item.hora_pesado_bruto).format('HH:mm'),
+                    hPesado: moment(item.hora_pesado_bruto).format('DD/MM/YYYY, h:mm:ss a'),
                     carga: item.carga,
                     nBultos: item.n_bultos,
                     envasado: true,
@@ -144,12 +192,12 @@ function TableComponent() {
                     cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
                     cBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
                     pMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras : '',
-                    pDescarga: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
+                    //pDescarga: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
+                    pDescarga: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
                     cPrevista: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_prevista : '',
                     estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
-                    obsvLaboratorio: '',
-                    obsvDescargador: '',
-
+                    obsLaboratorio: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
+                    obsBascula: '',
                 }));
                 console.log(dataSource);
                 setDataSource(dataSource); 
@@ -222,15 +270,16 @@ function TableComponent() {
         //     key: 'cBascula'
         // },
         {
-            title: 'Punto de muestra',
-            dataIndex: 'pMuestra',
-            key: 'pMuestra'
-        },
-        {
             title: 'Punto de descarga laboratorio',
             dataIndex: 'pDescarga',
             key: 'pDescarga'
         },
+        {
+            title: 'Punto de muestra',
+            dataIndex: 'pMuestra',
+            key: 'pMuestra'
+        },
+        
         {
             title: 'Cantidad prevista',
             dataIndex: 'cPrevista',
@@ -244,8 +293,8 @@ function TableComponent() {
         // },
         {
             title: 'Observaciones de laboratorio',
-            dataIndex: 'obsvLaboratorio',
-            key: 'obsvLaboratorio',
+            dataIndex: 'obsLaboratorio',
+            key: 'obsLaboratorio',
             // render: (_, record) => (
             //     <Button onClick={() => showObservacionesModal(record)}>Ver observaciones</Button>
             // ),
@@ -253,8 +302,8 @@ function TableComponent() {
         },
         {
             title: 'Observaciones de Bascula',
-            dataIndex: 'obsvLaboratorio',
-            key: 'obsvLaboratorio',
+            dataIndex: 'obsBascula',
+            key: 'obsBascula',
 
         },
         {
@@ -299,6 +348,11 @@ function TableComponent() {
     }));
 
     const columns2 = () => ([
+        {
+            title: 'Nº Pedido',
+            dataIndex: 'nPedido',
+            key: 'nPedido',
+        },
         {
             title: 'Venta a nombre',
             dataIndex: 'vNombre',
@@ -433,12 +487,14 @@ function TableComponent() {
         if (colorA < colorB) return -1;
         if (colorA > colorB) return 1;
     
-        return new Date('1970/01/01 ' + a.hPesado) - new Date('1970/01/01 ' + b.hPesado);
+        const dateA = moment(a.hPesado, 'DD/MM/YYYY, h:mm:ss a');
+        const dateB = moment(b.hPesado, 'DD/MM/YYYY, h:mm:ss a');
+        return dateA - dateB;
     });
 
     return (
         <div className='Table'>
-            <Table dataSource={sortedData} columns={columns()} pagination={false} />
+            <Table dataSource={sortedData} columns={columns()} pagination={false} style={{padding: "10px"}}/>
             <Modal title="Detalles de la fila" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                 <table className='table'>
                     <tbody>
