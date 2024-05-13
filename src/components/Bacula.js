@@ -160,6 +160,7 @@ function TableComponent() {
           nPedido: item.id_navision,
           name: item.venta_nombre,
           hPesado: moment(item.hora_pesado_bruto).format(' h:mm:ss'),
+          hModificacion: moment.utc(linea.updatedAt).add(2, 'hours').format("HH:mm:ss") || '',
           pBruto: item.peso_bruto,
           nMatricula: item.n_matricula,
           nomConductor: item.nombre_conductor,
@@ -167,10 +168,11 @@ function TableComponent() {
           descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
           pDescarga: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
           cantidad: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad : '',
-          observacionesDesc: item.lineas && item.lineas.length > 0 ? item.lineas[0].observacionesDesc : '',
+          observacionesDesc: linea.observaciones_descargador || '',
           observacionesLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
           observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
-          estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
+          //estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
+          estado: 'Camión sin llegar',
         }));
         console.log(dataSource);
         setDataSource(dataSource);
@@ -264,17 +266,42 @@ function TableComponent() {
     "Camion sin llegar": 3,
   };
 
-  const sortedData = dataSource.sort((a, b) => {
+  // const sortedData = dataSource.sort((a, b) => {
 
+  //   const colorA = stateColorValue[a.estado] || 4;
+  //   const colorB = stateColorValue[b.estado] || 4;
+  //   if (colorA < colorB) return -1;
+  //   if (colorA > colorB) return 1;
+
+  //   const dateA = moment(a.hPesado, ' h:mm:ss a');
+  //   const dateB = moment(b.hPesado, ' h:mm:ss a');
+  //   return dateA - dateB;
+  // });
+
+  const sortedData = dataSource.sort((a, b) => {
     const colorA = stateColorValue[a.estado] || 4;
     const colorB = stateColorValue[b.estado] || 4;
     if (colorA < colorB) return -1;
     if (colorA > colorB) return 1;
 
-    const dateA = moment(a.hPesado, ' h:mm:ss a');
-    const dateB = moment(b.hPesado, ' h:mm:ss a');
-    return dateA - dateB;
-  });
+    let dateA;
+    let dateB;
+
+    if (a.hModificacion) {
+        dateA = moment(a.hModificacion, ' h:mm:ss ');
+    } else {
+        dateA = moment(a.hPesado, ' h:mm:ss ');
+    }
+
+    if (b.hModificacion) {
+        dateB = moment(b.hModificacion, ' h:mm:ss ');
+    } else {
+        dateB = moment(b.hPesado, ' h:mm:ss ');
+    }
+
+    return dateB - dateA;
+});
+
 
   return (
     <div className="Table">

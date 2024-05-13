@@ -1,8 +1,9 @@
 .ant-table-thead>tr>th {
-    background-color: #00af66  !important;
+    background-color: #00af66 !important;
     color: #ededed !important;
     font-weight: bold !important;
 }
+
 .ant-table-row {
     transition: background-color 0.3s ease;
 }
@@ -13,18 +14,19 @@
 }
 
 
-.table th, .table td {
+.table th,
+.table td {
     text-align: left;
     padding: 8px;
 
 }
 
 .selectNaranja .ant-select-selector {
-    background-color: orange !important; 
+    background-color: orange !important;
 }
 
 .selectRojo .ant-select-selector {
-    background-color: red !important; 
+    background-color: red !important;
 }
 
 .selectAmarillo .ant-select-selector {
@@ -41,13 +43,25 @@
 
 .ant-checkbox-wrapper-checked .ant-checkbox-inner {
     background-color: #ededed;
-    border-color: grey; 
+    border-color: grey;
 }
 
 
 .ant-checkbox-checked .ant-checkbox-inner::after {
-    border-color: #1d1d1d; 
+    border-color: #1d1d1d;
 }
 
+.input-with-data {
+    /* Deshabilita la edición del campo */
+    /* pointer-events: none;*/
 
+    color: #000;
+    background-color: transparent;
+    opacity: 1;
+}
 
+.input-with-data::placeholder {
+    color: #000;
+    opacity: 1;
+    font-size: 16px;
+}

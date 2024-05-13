@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react
 
 import { Layout, Menu } from 'antd';
 //import 'antd/dist/antd.css';
-import Table from './components/Bacula';
+import Table from './components/Bascula';
 import Lab from './components/Laboratorio';
 import Desc from './components/Descargador';
 import logo from './pictures/LogoAgaleus_ico.svg';

@@ -16,6 +16,8 @@ function TableComponent() {
     const [selectedRowDetails, setSelectedRowDetails] = useState(null);
     const [text, setText] = useState('');
     const naranja = ['Muestra enviada a Laboratorio', 'Muestra Recibida por el laboratorio', 'Muestra en análisis', 'Pendiente descarga'];
+    const [updateStatus, setUpdateStatus] = useState({});
+    const [originalData, setOriginalData] = useState([]);
 
     const showModal = (record) => {
         setSelectedRowDetails(record);
@@ -45,14 +47,25 @@ function TableComponent() {
     const [observacionInput, setObservacionInput] = useState({});
 
     const handleObservacionesChange = (id, event) => {
-        setObservacionInput({ ...observacionInput, [id]: event.target.value });
+        setObservacionInput(prev => ({ ...prev, [id]: event.target.value }));
         console.log("handleObservacionesChange:", id, event.target.value);
     };
 
     const handleObservacionesBlur = (id) => {
-        console.log("handleObservacionesBlur:", id);
-        const updatedObservation = { "observaciones_laboratorio_bascula": observacionInput[id] };
+        // Solo actualizamos si el input aún tiene valor, evitando dobles llamadas
+        if (observacionInput[id]) {
+            updateObservacionesLab(id);
+        }
+    };
 
+    const handleKeyPress = (e, id) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            updateObservacionesLab(id);
+        }
+    };
+    const updateObservacionesLab = (id) => {
+        const updatedObservation = { "observaciones_laboratorio_bascula": observacionInput[id] };
         axios({
             method: 'put',
             url: `http://52.214.60.157:8080/api/linea/${id}`,
@@ -60,32 +73,36 @@ function TableComponent() {
             data: updatedObservation,
         })
             .then(response => {
-                console.log(response.data);
+                setDataSource(prevState => {
+                    const index = prevState.findIndex((item) => item.id_item === id);
+                    return [
+                        ...prevState.slice(0, index),
+                        { ...prevState[index], observacionesLab: observacionInput[id] },
+                        ...prevState.slice(index + 1)
+                    ];
+                });
 
-                const index = dataSource.findIndex((item) => item.id_item === id);
+                // Limpia el input y el estado de actualización
+                setObservacionInput(prev => ({ ...prev, [id]: '' }));
+                setUpdateStatus(prev => ({ ...prev, [id]: 'ok' }));
 
-                setDataSource(prevState => ([
-                    ...prevState.slice(0, index),
-                    {
-                        ...prevState[index],
-                        observacionesBCD: observacionInput[id]
-                    },
-                    ...prevState.slice(index + 1)
-                ]));
-
-                loadData();
+                // Mantener el mensaje de estado visible durante 5 segundos
+                setTimeout(() => {
+                    setUpdateStatus(prev => ({ ...prev, [id]: undefined }));
+                    loadData();
+                }, 5000); // Ajusta el tiempo de visualización aquí
             })
             .catch(error => {
-                console.log(error);
+                console.error(error);
+                // Establecer el estado de error
+                setUpdateStatus(prev => ({ ...prev, [id]: 'error' }));
+
+                // Mantener el mensaje de estado visible durante 5 segundos
+                setTimeout(() => {
+                    setUpdateStatus(prev => ({ ...prev, [id]: undefined }));
+                }, 5000); // Ajusta el tiempo de visualización aquí
             });
-
-        setObservacionInput(prevState => {
-            const newState = { ...prevState };
-            delete newState[id];
-            return newState;
-        });
     };
-
 
     const handleCheck = (e, key) => {
         const checked = e.target.checked;
@@ -98,7 +115,6 @@ function TableComponent() {
             })
         );
     };
-
 
     const traductor = (punto) => {
         // if (punto === 'ENVASES') {
@@ -148,176 +164,57 @@ function TableComponent() {
 
     };
 
-    const [dataSource, setDataSource] = useState([
-        // {
-        //     key: '1',
-        //     vNombre: '010101',
-        //     pBruto: '25',
-        //     pNeto: '20',
-        //     nBultos: '4',
-        //     envasado: true,
-        //     tipo: 'Articulo',
-        //     descripcion: 'Ácido sulfúrico',
-        //     cAlmacen: '1030',
-        //     cantBascula: '15',
-        //     tBulto: '20010',
-        //     bultos: '4',
-        //     pDescargaLab: '',
-        //     observacionesBCD: '',
-        //     nuevaMuestra: '',
-        //     muestrasProporcionadas: '',
-        //     hModificacion: '08:30',
-        //     estado: 'Muestra enviada a Laboratorio',
-        //     obsvDescargador: '',
-        //     obsvLaboratorio: '',
-        // },
-        // {
-        //     key: '2',
-        //     vNombre: '010102',
-        //     pBruto: '30',
-        //     pNeto: '25',
-        //     nBultos: '5',
-        //     envasado: true,
-        //     tipo: 'Articulo',
-        //     descripcion: 'Ácido sulfúrico',
-        //     cAlmacen: '1030',
-        //     cantBascula: '20',
-        //     tBulto: '20010',
-        //     bultos: '5',
-        //     pDescargaLab: '',
-        //     observacionesBCD: '',
-        //     nuevaMuestra: '',
-        //     muestrasProporcionadas: '',
-        //     hModificacion: '09:40',
-        //     estado: 'Muestra en análisis',
-        //     obsvDescargador: '',
-        //     obsvLaboratorio: '',
-        // },
-        // {
-        //     key: '3',
-        //     vNombre: '010103',
-        //     pBruto: '28',
-        //     pNeto: '23',
-        //     nBultos: '6',
-        //     envasado: false,
-        //     tipo: 'Articulo',
-        //     descripcion: 'Ácido sulfúrico',
-        //     cAlmacen: '1030',
-        //     cantBascula: '18',
-        //     tBulto: '20010',
-        //     bultos: '6',
-        //     pDescargaLab: '',
-        //     observacionesBCD: '',
-        //     nuevaMuestra: '',
-        //     muestrasProporcionadas: '',
-        //     hModificacion: '10:15',
-        //     estado: 'Muestra tomada',
-        //     obsvDescargador: '',
-        //     obsvLaboratorio: '',
-        // },
-        // {
-        //     key: '4',
-        //     vNombre: '010104',
-        //     pBruto: '30',
-        //     pNeto: '20',
-        //     nBultos: '5',
-        //     envasado: false,
-        //     tipo: 'Articulo',
-        //     descripcion: 'Ácido sulfúrico',
-        //     cAlmacen: '1030',
-        //     cantBascula: '20',
-        //     tBulto: '20010',
-        //     bultos: '5',
-        //     pDescargaLab: '',
-        //     observacionesBCD: '',
-        //     nuevaMuestra: '',
-        //     muestrasProporcionadas: '',
-        //     hModificacion: '10:00',
-        //     estado: 'Permiso descarga',
-        //     obsvDescargador: '',
-        //     obsvLaboratorio: '',
-        // },
-    ]);
+    const [dataSource, setDataSource] = useState([]);
+
     const loadData = () => {
         axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
             .then(response => {
                 console.log(response.data);
-                const dataSource = response.data.cabeza.map(item => ({
-                    key: item.id.toString(),
-                    id_item: item.lineas && item.lineas.length > 0 ? item.lineas[0].id : '',
-                    vNombre: item.id_navision,
-                    name: item.venta_nombre,
-                    hPesado: moment(item.hora_pesado_bruto).format(' h:mm:ss '),
-                    pBruto: item.peso_bruto,
-                    pNeto: (item.peso_bruto - item.peso_tara),
-                    nBultos: item.n_bulto,
-                    envasado: false,
-                    tipo: item.lineas && item.lineas.length > 0 ? item.lineas[0].type : 'No type',
-                    descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
-                    cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
-                    cantBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
-                    tBulto: item.lineas && item.lineas.length > 0 ? item.lineas[0].tipo_bulto : '',
-                    bultos: item.lineas && item.lineas.length > 0 ? item.lineas[0].bulto : '',
-                    pDescargaLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].punto_descarga_laboratorio || '' : '',
-                    //pDescargaLab: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
-                    observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
-                    nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
-                    muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
-                    hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
-                    estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
-                    obsDescargador: '',
-                    obsBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
-                }));
+                const dataSource = response.data.cabeza.flatMap(cabecera => {
+                    return cabecera.lineas.map(linea => ({
+                        key: linea.id.toString(),
+                        id_item: linea.id,
+                        vNombre: cabecera.id_navision,
+                        name: cabecera.venta_nombre,
+                        hPesado: moment.utc(cabecera.hora_pesado_bruto).format("HH:mm:ss"),
+                        hModificacion: moment.utc(linea.updatedAt).add(2, 'hours').format("HH:mm:ss") || '',
+                        pBruto: cabecera.peso_bruto,
+                        pNeto: (cabecera.peso_bruto - cabecera.peso_tara),
+                        nBultos: cabecera.n_bulto,
+                        envasado: linea.codigo_almacen === 'envasado' ? 'Si' : 'No',
+                        tipo: linea.type,
+                        descripcion: linea.descripcion,
+                        //cAlmacen: traductor(linea.codigo_almacen),
+                        cAlmacen: linea.codigo_almacen,
+                        cantBascula: linea.cantidad_bascula,
+                        tBulto: linea.tipo_bulto,
+                        bultos: linea.bulto,
+                        pDescargaLab: linea.punto_descarga_laboratorio || '',
+                        observacionesLab: linea.observaciones_laboratorio_bascula || '',
+                        nuevaMuestra: linea.linea_muestras || '',
+                        muestrasProporcionadas: linea.muestras_proporcionadas || '',
+                        //estado: linea.estado !== null ? linea.estado : 'Camión sin llegar',
+                        estado: 'Camión sin llegar',
+                        obsDescargador: linea.observaciones_descargador || '',
+                        obsBascula: linea.observaciones_bascula_camion_descarga || '',
+                    }));
+                });
                 setDataSource(dataSource);
             })
             .catch(error => {
                 console.log(error);
             });
+    };
 
-    }
     useEffect(() => {
-        // axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
-        //     .then(response => {
-        //         console.log(response.data);
-        //         const dataSource = response.data.cabeza.map(item => ({
-        //             key: item.id.toString(),
-        //             id_item: item.lineas && item.lineas.length > 0 ? item.lineas[0].id : '',
-        //             vNombre: item.id_navision,
-        //             name: item.venta_nombre,
-        //             hPesado: moment(item.hora_pesado_bruto).format(' DD/MM/YYYY, h:mm:ss a'),
-        //             pBruto: item.peso_bruto,
-        //             pNeto: (item.peso_bruto - item.peso_tara),
-        //             nBultos: item.n_bulto,
-        //             envasado: false,
-        //             tipo: item.lineas && item.lineas.length > 0 ? item.lineas[0].type : 'No type',
-        //             descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
-        //             cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
-        //             cantBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
-        //             tBulto: item.lineas && item.lineas.length > 0 ? item.lineas[0].tipo_bulto : '',
-        //             bultos: item.lineas && item.lineas.length > 0 ? item.lineas[0].bulto : '',
-        //             pDescargaLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].punto_descarga_laboratorio || '' : '',
-        //             //pDescargaLab: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
-        //             observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
-        //             nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
-        //             muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
-        //             hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
-        //             estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
-        //             obsDescargador: '',
-        //             obsBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
-        //         }));
-        //         setDataSource(dataSource);
-        //     })
-        //     .catch(error => {
-        //         console.log(error);
-        //     });
         loadData();
     }, []);
 
     const columns = () => ([
         {
-            title: 'Nº Pedido',
-            dataIndex: 'vNombre',
-            key: 'vNombre',
+            title: 'Venta a nombre',
+            dataIndex: 'name',
+            key: 'name',
         },
         // {
         //     title: 'Peso bruto',
@@ -374,7 +271,6 @@ function TableComponent() {
         //     dataIndex: 'bultos',
         //     key: 'bultos',
         // },
-
         {
             title: 'Observaciones descargador',
             dataIndex: 'obsDescargador',
@@ -430,16 +326,24 @@ function TableComponent() {
             title: 'Observaciones',
             dataIndex: 'observacionesBCD',
             key: 'observacionesBCD',
-            render: (_, record) => (
-                <Escribir
-                    // value={record.observacionesBCD}
-                    // onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCD')}
-                    // placeholder={'Observaciones'}
-                    value={observacionInput[record.id_item] || record.observacionesBCD}
-                    onChange={e => handleObservacionesChange(record.id_item, e)}
-                    onBlur={() => handleObservacionesBlur(record.id_item)}
-                    placeholder={'Observaciones'}
-                />
+            render: (_, record, observaciones) => (
+                <div>
+                    {updateStatus[record.id_item] && (
+                        <span style={{ color: updateStatus[record.id_item] === 'ok' ? 'green' : 'red' }}>
+                            {updateStatus[record.id_item] === 'ok' ? 'Actualización exitosa' : 'Error al actualizar'}
+                        </span>
+                    )}
+                    <Input
+                        className={record.observacionesBCD ? 'input-with-data' : ''}
+                        placeholder={record.observacionesBCD || 'Observaciones'}
+                        value={observacionInput[record.id_item] || ''}
+                        onBlur={() => handleObservacionesBlur(record.id_item)}
+                        onKeyDown={(e) => handleKeyPress(e, record.id_item)}
+                        onChange={(e) => handleObservacionesChange(record.id_item, e)}
+                    />
+
+                </div>
+
             ),
         },
         {
@@ -542,15 +446,7 @@ function TableComponent() {
             title: 'Estado',
             dataIndex: 'estado',
             key: 'estado',
-            render: (text, record) => (
-                <Seleccion
-                    estadoInicial={text}
-                    onEstadoChange={handleChange}
-                    recordKey={record.key}
-                    naranja={naranja}
-                />
 
-            ),
         },
         {
             title: 'Observaciones descargador',
@@ -579,37 +475,19 @@ function TableComponent() {
             title: 'Observaciones',
             dataIndex: 'observacionesBCD',
             key: 'observacionesBCD',
-            render: (_, record) => (
-                <Escribir
-                    value={record.observacionesBCD}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'observacionesBCD')}
-                    placeholder={'Observaciones'}
-                />
-            ),
+
         },
         {
             title: 'Solicita nueva muestra',
             dataIndex: 'nuevaMuestra',
             key: 'nuevaMuestra',
-            render: (_, record) => (
-                <Escribir
-                    value={record.nuevaMuestra}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'nuevaMuestra')}
-                    placeholder={'Nueva muestra'}
-                />
-            ),
+
         },
         {
             title: 'Muestras Proporcionadas',
             dataIndex: 'muestrasProporcionadas',
             key: 'muestrasProporcionadas',
-            render: (_, record) => (
-                <Escribir
-                    value={record.muestrasProporcionadas}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'muestrasProporcionadas')}
-                    placeholder={'Muestra'}
-                />
-            ),
+
         },
 
     ]).map(col => ({
@@ -628,24 +506,48 @@ function TableComponent() {
         'Muestra tomada': 3,
     };
 
-    const sortedData = dataSource.sort((a, b) => {
+    // const sortedData = dataSource.sort((a, b) => {
 
+    //     const colorA = stateColorValue[a.estado] || 4;
+    //     const colorB = stateColorValue[b.estado] || 4;
+    //     if (colorA < colorB) return -1;
+    //     if (colorA > colorB) return 1;
+
+    //     // if (colorA === colorB) {
+    //     //     return a.vNombre.localeCompare(b.vNombre);
+    //     // }
+
+    //     // if (!a.hPesado || !b.hPesado) {
+    //     //     return 0;
+    //     // }
+
+    //     const dateA = moment(a.hPesado, ' h:mm:ss ');
+    //     const dateB = moment(b.hPesado, ' h:mm:ss ');
+    //     return dateA - dateB;
+    // });
+
+    const sortedData = dataSource.sort((a, b) => {
         const colorA = stateColorValue[a.estado] || 4;
         const colorB = stateColorValue[b.estado] || 4;
         if (colorA < colorB) return -1;
         if (colorA > colorB) return 1;
-
-        // if (colorA === colorB) {
-        //     return a.vNombre.localeCompare(b.vNombre);
-        // }
-
-        // if (!a.hPesado || !b.hPesado) {
-        //     return 0;
-        // }
-
-        const dateA = moment(a.hPesado, ' h:mm:ss ');
-        const dateB = moment(b.hPesado, ' h:mm:ss ');
-        return dateA - dateB;
+    
+        let dateA;
+        let dateB;
+    
+        if (a.hModificacion) {
+            dateA = moment(a.hModificacion, ' h:mm:ss ');
+        } else {
+            dateA = moment(a.hPesado, ' h:mm:ss ');
+        }
+    
+        if (b.hModificacion) {
+            dateB = moment(b.hModificacion, ' h:mm:ss ');
+        } else {
+            dateB = moment(b.hPesado, ' h:mm:ss ');
+        }
+    
+        return dateB - dateA;
     });
 
     return (
@@ -667,3 +569,164 @@ function TableComponent() {
     );
 }
 export default TableComponent;
+
+/*const loadData = () => {
+        axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
+            .then(response => {
+                console.log(response.data);
+                const dataSource = response.data.cabeza.map(item => ({
+                    key: item.id.toString(),
+                    id_item: item.lineas && item.lineas.length > 0 ? item.lineas[0].id : '',
+                    vNombre: item.id_navision,
+                    name: item.venta_nombre,
+                    hPesado: moment(item.hora_pesado_bruto).format(' h:mm:ss '),
+                    pBruto: item.peso_bruto,
+                    pNeto: (item.peso_bruto - item.peso_tara),
+                    nBultos: item.n_bulto,
+                    envasado: false,
+                    tipo: item.lineas && item.lineas.length > 0 ? item.lineas[0].type : 'No type',
+                    descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
+                    cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
+                    cantBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
+                    tBulto: item.lineas && item.lineas.length > 0 ? item.lineas[0].tipo_bulto : '',
+                    bultos: item.lineas && item.lineas.length > 0 ? item.lineas[0].bulto : '',
+                    pDescargaLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].punto_descarga_laboratorio || '' : '',
+                    //pDescargaLab: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
+                    observacionesLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
+                    //observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_bascula_camion_descarga || '' : '',
+                    nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
+                    muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
+                    hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
+                    estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
+                    obsDescargador: '',
+                    obsBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_bascula_camion_descarga || '' : '',
+                }));
+                setDataSource(dataSource);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+
+    }*/
+// axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
+//     .then(response => {
+//         console.log(response.data);
+//         const dataSource = response.data.cabeza.map(item => ({
+//             key: item.id.toString(),
+//             id_item: item.lineas && item.lineas.length > 0 ? item.lineas[0].id : '',
+//             vNombre: item.id_navision,
+//             name: item.venta_nombre,
+//             hPesado: moment(item.hora_pesado_bruto).format(' DD/MM/YYYY, h:mm:ss a'),
+//             pBruto: item.peso_bruto,
+//             pNeto: (item.peso_bruto - item.peso_tara),
+//             nBultos: item.n_bulto,
+//             envasado: false,
+//             tipo: item.lineas && item.lineas.length > 0 ? item.lineas[0].type : 'No type',
+//             descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
+//             cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
+//             cantBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
+//             tBulto: item.lineas && item.lineas.length > 0 ? item.lineas[0].tipo_bulto : '',
+//             bultos: item.lineas && item.lineas.length > 0 ? item.lineas[0].bulto : '',
+//             pDescargaLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].punto_descarga_laboratorio || '' : '',
+//             //pDescargaLab: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
+//             observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
+//             nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
+//             muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
+//             hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
+//             estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
+//             obsDescargador: '',
+//             obsBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
+//         }));
+//         setDataSource(dataSource);
+//     })
+//     .catch(error => {
+//         console.log(error);
+//     });
+// {
+//     key: '1',
+//     vNombre: '010101',
+//     pBruto: '25',
+//     pNeto: '20',
+//     nBultos: '4',
+//     envasado: true,
+//     tipo: 'Articulo',
+//     descripcion: 'Ácido sulfúrico',
+//     cAlmacen: '1030',
+//     cantBascula: '15',
+//     tBulto: '20010',
+//     bultos: '4',
+//     pDescargaLab: '',
+//     observacionesBCD: '',
+//     nuevaMuestra: '',
+//     muestrasProporcionadas: '',
+//     hModificacion: '08:30',
+//     estado: 'Muestra enviada a Laboratorio',
+//     obsvDescargador: '',
+//     obsvLaboratorio: '',
+// },
+// {
+//     key: '2',
+//     vNombre: '010102',
+//     pBruto: '30',
+//     pNeto: '25',
+//     nBultos: '5',
+//     envasado: true,
+//     tipo: 'Articulo',
+//     descripcion: 'Ácido sulfúrico',
+//     cAlmacen: '1030',
+//     cantBascula: '20',
+//     tBulto: '20010',
+//     bultos: '5',
+//     pDescargaLab: '',
+//     observacionesBCD: '',
+//     nuevaMuestra: '',
+//     muestrasProporcionadas: '',
+//     hModificacion: '09:40',
+//     estado: 'Muestra en análisis',
+//     obsvDescargador: '',
+//     obsvLaboratorio: '',
+// },
+// {
+//     key: '3',
+//     vNombre: '010103',
+//     pBruto: '28',
+//     pNeto: '23',
+//     nBultos: '6',
+//     envasado: false,
+//     tipo: 'Articulo',
+//     descripcion: 'Ácido sulfúrico',
+//     cAlmacen: '1030',
+//     cantBascula: '18',
+//     tBulto: '20010',
+//     bultos: '6',
+//     pDescargaLab: '',
+//     observacionesBCD: '',
+//     nuevaMuestra: '',
+//     muestrasProporcionadas: '',
+//     hModificacion: '10:15',
+//     estado: 'Muestra tomada',
+//     obsvDescargador: '',
+//     obsvLaboratorio: '',
+// },
+// {
+//     key: '4',
+//     vNombre: '010104',
+//     pBruto: '30',
+//     pNeto: '20',
+//     nBultos: '5',
+//     envasado: false,
+//     tipo: 'Articulo',
+//     descripcion: 'Ácido sulfúrico',
+//     cAlmacen: '1030',
+//     cantBascula: '20',
+//     tBulto: '20010',
+//     bultos: '5',
+//     pDescargaLab: '',
+//     observacionesBCD: '',
+//     nuevaMuestra: '',
+//     muestrasProporcionadas: '',
+//     hModificacion: '10:00',
+//     estado: 'Permiso descarga',
+//     obsvDescargador: '',
+//     obsvLaboratorio: '',
+// },

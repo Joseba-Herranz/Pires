@@ -14,7 +14,9 @@ function TableComponent() {
     const [selectedRowDetails, setSelectedRowDetails] = useState(null);
     const [text, setText] = useState('');
     const naranja = ['Camión pesada inicial', 'Aviso a conductor para toma de muestra', 'Muestra tomada', 'Pedido con Permiso descarga', 'Aviso a conductor para ir a descargar'];
-
+    const [updateStatus, setUpdateStatus] = useState({});
+    const [originalData, setOriginalData] = useState([]);
+    const [dataSource, setDataSource] = useState([]);
     const showModal = (record) => {
         setSelectedRowDetails(record);
         console.log(record)
@@ -62,6 +64,64 @@ function TableComponent() {
         );
     };
 
+    
+
+
+    const [observacionInput, setObservacionInput] = useState({});
+    const updateObservacionesDescargador = (id) => {
+        const updatedObservation = { "observaciones_descargador": observacionInput[id] };
+        axios({
+          method: 'put',
+          url: `http://52.214.60.157:8080/api/linea/${id}`,
+          headers: { 'Content-Type': 'application/json' },
+          data: updatedObservation,
+        })
+          .then(response => {
+            setDataSource(prevState => {
+              const index = prevState.findIndex((item) => item.key === id);
+              return [
+                ...prevState.slice(0, index),
+                { ...prevState[index], obsvDescargador: observacionInput[id] },
+                ...prevState.slice(index + 1)
+              ];
+            });
+      
+            // Limpia el input y el estado de actualización
+            setObservacionInput(prev => ({ ...prev, [id]: '' }));
+            setUpdateStatus(prev => ({ ...prev, [id]: 'ok' }));
+      
+            // Mantener el mensaje de estado visible durante 5 segundos
+            setTimeout(() => {
+              setUpdateStatus(prev => ({ ...prev, [id]: undefined }));
+              loadData();
+            }, 5000); // Ajusta el tiempo de visualización aquí
+          })
+          .catch(error => {
+            console.error(error);
+            // Establecer el estado de error
+            setUpdateStatus(prev => ({ ...prev, [id]: 'error' }));
+      
+            // Mantener el mensaje de estado visible durante 5 segundos
+            setTimeout(() => {
+              setUpdateStatus(prev => ({ ...prev, [id]: undefined }));
+            }, 5000); // Ajusta el tiempo de visualización aquí
+          });
+      };
+      
+      const handleObservacionesBlurDescargador = (id) => {
+        // Solo actualizamos si el input aún tiene valor, evitando dobles llamadas
+        if (observacionInput[id]) {
+          updateObservacionesDescargador(id);
+        }
+      };
+      
+      const handleKeyPressDescargador = (e, id) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          updateObservacionesDescargador(id);
+        }
+      };
+      
     const traductor = (punto) => {
         // if (punto === 'ENVASES') {
         //     return 'Materia prima';
@@ -109,146 +169,54 @@ function TableComponent() {
             }
         
     };
-
-    const [dataSource, setDataSource] = useState([
-    //     {
-    //         key: '1',
-    //         vNombre: '010101',
-    //         fPedido: '2021-10-01',
-    //         hPesado: '08:00',
-    //         carga: '30',
-    //         nBultos: '4',
-    //         envasado: true,
-    //         nMatricula: '1020ALD',
-    //         nConductor: 'Juan Pérez',
-    //         descripcion: 'Acido',
-    //         cAlmacen: '1030',
-    //         cBascula: '15',
-    //         pMuestra: '1031',
-    //         pDescarga: '1030',
-    //         cPrevista: '15',
-    //         estado: 'Camión pesada inicial',
-    //         obsvLaboratorio: '',
-    //         obsvDescargador: '',
-    //     },
-    //     {
-    //         key: '2',
-    //         vNombre: '020202',
-    //         fPedido: '2021-11-15',
-    //         hPesado: '10:30',
-    //         carga: '45',
-    //         nBultos: '2',
-    //         envasado: true,
-    //         nMatricula: '2030JBD',
-    //         nConductor: 'Laura Gómez',
-    //         descripcion: 'Acido',
-    //         cAlmacen: '1030',
-    //         cBascula: '20',
-    //         pMuestra: '1031',
-    //         pDescarga: '1030',
-    //         cPrevista: '20',
-    //         estado: 'Aviso a conductor para toma de muestra',
-    //         obsvLaboratorio: '',
-    //         obsvDescargador: ''
-    //     },
-    //     {
-    //         key: '3',
-    //         vNombre: '030303',
-    //         fPedido: '2022-01-10',
-    //         hPesado: '07:45',
-    //         carga: '50',
-    //         nBultos: '5',
-    //         envasado: true,
-    //         nMatricula: '5041OKL',
-    //         nConductor: 'Carlos Ruiz',
-    //         descripcion: 'Acido',
-    //         cAlmacen: '1030',
-    //         cBascula: '25',
-    //         pMuestra: '1031',
-    //         pDescarga: '1030',
-    //         cPrevista: '25',
-    //         estado: 'Muestra analizada',
-    //         obsvLaboratorio: '',
-    //         obsvDescargador: ''
-    //     },
-    ]);
-
-    useEffect(() => {
+    const handleKeyPress = (e, id) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          updateObservacionesDescargador(id);
+        }
+      };
+  
+    const loadData = () => {
         axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
         .then(response => {
-            console.log(response.data); 
-            const dataSource = response.data.cabeza.map(item => ({
-                    key: item.id.toString(),
-                    nPedido: item.id_navision,
-                    vNombre: item.venta_nombre,
-                    fPedido: item.fecha_registro,
-                    hPesado: moment(item.hora_pesado_bruto).format('DD/MM/YYYY, h:mm:ss a'),
-                    carga: item.carga,
-                    nBultos: item.n_bultos,
-                    envasado: true,
-                    nMatricula: item.n_matricula,
-                    nConductor: item.nombre_conductor,
-                    descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
-                    cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
-                    cBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
-                    pMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras : '',
-                    //pDescarga: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
-                    pDescarga: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
-                    cPrevista: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_prevista : '',
-                    estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
-                    obsLaboratorio: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
-                    obsBascula: '',
-                }));
-                console.log(dataSource);
-                setDataSource(dataSource); 
-            })
-            .catch(error => console.error('There was an error getting the data:', error));
-    }, []);
-
+          console.log(response.data);
+          const dataSource = response.data.cabeza.flatMap(item => {
+            return item.lineas.map(linea => ({
+              key: linea.id.toString(),
+              nPedido: item.id_navision,
+              vNombre: item.venta_nombre,
+              fPedido: item.fecha_registro,
+              hPesado: moment.utc(item.hora_pesado_bruto).format("HH:mm:ss"),
+              hModificacion: moment.utc(linea.updatedAt).add(2, 'hours').format("HH:mm:ss") || '',
+              carga: item.carga,
+              nBultos: item.n_bultos,
+              envasado: linea.codigo_almacen === 'envasado' ? 'Si' : 'No',
+              nMatricula: item.n_matricula,
+              nConductor: item.nombre_conductor,
+              descripcion: linea.descripcion,
+              cAlmacen: linea.codigo_almacen,
+              cBascula: linea.cantidad_bascula,
+              pMuestra: linea.linea_muestras || '',
+              pDescarga: traductor(linea.codigo_almacen),
+              cPrevista: linea.cantidad_prevista || '',
+              //estado: linea.estado !== null ? linea.estado : 'Camión sin llegar',
+              estado: 'Camión sin llegar',
+              obsLaboratorio: linea.observaciones_laboratorio_bascula || '',
+              obsBascula: linea.observaciones_bascula_camion_descarga || '',
+              obsvDescargador: linea.observaciones_descargador || '',
+            }));
+          });
+          console.log(dataSource);
+          setDataSource(dataSource);
+        })
+        .catch(error => console.error('There was an error getting the data:', error));
+    }
+    useEffect(() => {
+      loadData()
+      }, []);
+      
     const columns = () => ([
-        // {
-        //     title: 'Venta a nombre',
-        //     dataIndex: 'vNombre',
-        //     key: 'vNombre'
-        // },
-        // {
-        //     title: 'Fecha prevista del pedido',
-        //     dataIndex: 'fPedido',
-        //     key: 'fPedido'
-        // },
-        // {
-        //     title: 'Hora pesado bruto',
-        //     dataIndex: 'hPesado',
-        //     key: 'hPesado'
-        // },
-        // {
-        //     title: 'Carga',
-        //     dataIndex: 'carga',
-        //     key: 'carga'
-        // },
-        // {
-        //     title: 'Nº de bultos',
-        //     dataIndex: 'nBultos',
-        //     key: 'nBultos'
-        // },
-        // {
-        //     title: 'Envasado',
-        //     dataIndex: 'envasado',
-        //     key: 'envasado',
-        //     render: (text, record) => (
-        //         <Checkbox checked={record.envasado} onChange={(e) => handleCheck(e, record.key)} />
-        //     ),
-        // },
-        // {
-        //     title: 'Nº matricula',
-        //     dataIndex: 'nMatricula',
-        //     key: 'nMatricula'
-        // },
-        // {
-        //     title: 'Nombre conductor',
-        //     dataIndex: 'nConductor',
-        //     key: 'nConductor'
-        // },
+      
         {
             title: 'Nº Pedido',
             dataIndex: 'nPedido',
@@ -326,13 +294,31 @@ function TableComponent() {
             dataIndex: 'obsvDescargador',
             key: 'obsvDescargador',
             render: (_, record) => (
+              <div>
+                {updateStatus[record.id_item] && (
+                  <span style={{ color: updateStatus[record.id_item] === 'ok' ? 'green' : 'red' }}>
+                    {updateStatus[record.id_item] === 'ok' ? 'Actualización exitosa' : 'Error al actualizar'}
+                  </span>
+                )}
                 <Escribir
-                    value={record.pDescargaLab}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'obsvDescargador')}
-                    placeholder={'Observaciones de Descarga'}
+                  className={record.obsvDescargador ? 'input-with-data' : ''}
+                  placeholder={'Observaciones'}
+                  defaultValue={record.obsvDescargador || ''}
+                  value={observacionInput[record.key] || ''} // Modificado record.id_item por record.key
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    setObservacionInput(prevState => ({
+                      ...prevState,
+                      [record.key]: value, // Modificado record.id_item por record.key
+                    }));
+                  }}
+                  onBlur={() => handleObservacionesBlurDescargador(record.key)} // Modificado record.id_item por record.key
+                  onKeyPress={(e) => handleKeyPressDescargador(e, record.key)} // Modificado record.id_item por record.key
+                  
                 />
+              </div>
             ),
-        },
+          },
         {
             title: 'Detalles',
             key: 'detalles',
@@ -382,9 +368,7 @@ function TableComponent() {
             title: 'Envasado',
             dataIndex: 'envasado',
             key: 'envasado',
-            render: (text, record) => (
-                <Checkbox checked={record.envasado} onChange={(e) => handleCheck(e, record.key)} />
-            ),
+            
         },
         {
             title: 'Nº matricula',
@@ -428,43 +412,31 @@ function TableComponent() {
 
         },
         {
-            title: 'Estado',
-            dataIndex: 'estado',
-            key: 'estado',
-            render: (text, record) => (
-                <Seleccion
-                    estadoInicial={text}
-                    onEstadoChange={handleChange}
-                    recordKey={record.key}
-                    naranja={naranja}
-                />
-
-            ),
-        },
-        {
             title: 'Observaciones de laboratorio',
-            dataIndex: 'obsvLaboratorio',
-            key: 'obsvLaboratorio',
+            dataIndex: 'obsLaboratorio',
+            key: 'obsLaboratorio',
+            
 
         },
         {
             title: 'Observaciones de Bascula',
-            dataIndex: 'obsvLaboratorio',
-            key: 'obsvLaboratorio',
+            dataIndex: 'obsBascula',
+            key: 'obsBascula',
 
         },
+        {
+            title: 'Estado',
+            dataIndex: 'estado',
+            key: 'estado',
+            
+        },
+     
         {
             title: 'Observaciones de descargador',
             dataIndex: 'obsvDescargador',
             key: 'obsvDescargador',
-            render: (_, record) => (
-                <Escribir
-                    value={record.pDescargaLab}
-                    onChange={e => handleObservacionesChange(record.key, e.target.value, 'obsvDescargador')}
-                    placeholder={'Observaciones de Descarga'}
-                />
-            ),
-        },
+            
+          },
     ]).map(col => ({
         ...col,
         onHeaderCell: () => ({
@@ -482,14 +454,27 @@ function TableComponent() {
     };
     
     const sortedData = dataSource.sort((a, b) => {
-        const colorA = stateColorValue[a.estado] || 3;
-        const colorB = stateColorValue[b.estado] || 3;
+        const colorA = stateColorValue[a.estado] || 4;
+        const colorB = stateColorValue[b.estado] || 4;
         if (colorA < colorB) return -1;
         if (colorA > colorB) return 1;
     
-        const dateA = moment(a.hPesado, 'DD/MM/YYYY, h:mm:ss a');
-        const dateB = moment(b.hPesado, 'DD/MM/YYYY, h:mm:ss a');
-        return dateA - dateB;
+        let dateA;
+        let dateB;
+    
+        if (a.hModificacion) {
+            dateA = moment(a.hModificacion, ' h:mm:ss ');
+        } else {
+            dateA = moment(a.hPesado, ' h:mm:ss ');
+        }
+    
+        if (b.hModificacion) {
+            dateB = moment(b.hModificacion, ' h:mm:ss ');
+        } else {
+            dateB = moment(b.hPesado, ' h:mm:ss ');
+        }
+    
+        return dateB - dateA;
     });
 
     return (
