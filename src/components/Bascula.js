@@ -224,7 +224,10 @@ function TableComponent() {
               observacionesDesc: linea.observacionesDesc || '',
               observacionesLab: linea.observaciones_laboratorio_bascula || '',
               observacionesBCD: linea.observaciones_bascula_camion_descarga || '',
-              estado: linea.estadoAsociado ? linea.estadoAsociado.descripcion : 'Camión sin llegar',
+              //estado: linea.estadoAsociado ? linea.estadoAsociado.descripcion : 'Camión sin llegar',
+              estado: linea.estado !== null ? linea.estado : 'Camión sin llegar',
+                        estadoActual: linea.estadoAsociado.descripcion,
+                        estadosRelacion: linea.estadoAsociado.estados_rel,
             });
           });
         });
@@ -279,12 +282,22 @@ function TableComponent() {
       key: 'estado',
       render: (text, record) => (
         <Seleccion
-          estadoInicial={record.estado ? record.estado : text}
+          estadoNum={record.estado}
+          estadoInicial={record.estadoActual}
+          estadosRelacion={record.estadosRelacion}
           onEstadoChange={handleChange}
-          recordKey={record.key}
-          naranja={naranja}
+          recordKey={record.id_item}
+          loadData={loadData}
           tipo={1}
         />
+
+        // <Seleccion
+        //   estadoInicial={record.estado ? record.estado : text}
+        //   onEstadoChange={handleChange}
+        //   recordKey={record.key}
+        //   naranja={naranja}
+        //   tipo={1}
+        // />
       ),
     },
     {

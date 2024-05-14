@@ -172,7 +172,9 @@ function TableComponent() {
           observacionesLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
           observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
           //estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
-          estado: 'Camión sin llegar',
+          estado: linea.estado !== null ? linea.estado : 'Camión sin llegar',
+          estadoActual: linea.estadoAsociado.descripcion,
+          estadosRelacion: linea.estadoAsociado.estados_rel,
         }));
         console.log(dataSource);
         setDataSource(dataSource);
@@ -220,12 +222,21 @@ function TableComponent() {
       key: 'estado',
       render: (text, record) => (
         <Seleccion
-          estadoInicial={text}
+          estadoNum={record.estado}
+          estadoInicial={record.estadoActual}
+          estadosRelacion={record.estadosRelacion}
           onEstadoChange={handleChange}
-          recordKey={record.key}
-          naranja={naranja}
+          recordKey={record.id_item}
+          loadData={loadData}
           tipo={1}
         />
+        // <Seleccion
+        //   estadoInicial={text}
+        //   onEstadoChange={handleChange}
+        //   recordKey={record.key}
+        //   naranja={naranja}
+        //   tipo={1}
+        // />
       ),
     },
     {
@@ -288,19 +299,19 @@ function TableComponent() {
     let dateB;
 
     if (a.hModificacion) {
-        dateA = moment(a.hModificacion, ' h:mm:ss ');
+      dateA = moment(a.hModificacion, ' h:mm:ss ');
     } else {
-        dateA = moment(a.hPesado, ' h:mm:ss ');
+      dateA = moment(a.hPesado, ' h:mm:ss ');
     }
 
     if (b.hModificacion) {
-        dateB = moment(b.hModificacion, ' h:mm:ss ');
+      dateB = moment(b.hModificacion, ' h:mm:ss ');
     } else {
-        dateB = moment(b.hPesado, ' h:mm:ss ');
+      dateB = moment(b.hPesado, ' h:mm:ss ');
     }
 
     return dateB - dateA;
-});
+  });
 
 
   return (

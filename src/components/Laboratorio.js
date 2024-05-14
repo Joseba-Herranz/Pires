@@ -308,6 +308,7 @@ function TableComponent() {
                     onEstadoChange={handleChange}
                     recordKey={record.id_item}
                     loadData={loadData}
+                    tipo={2}
                 />
 
                 // <Seleccion
