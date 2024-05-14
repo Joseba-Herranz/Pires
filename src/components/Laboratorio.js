@@ -193,10 +193,12 @@ function TableComponent() {
                         observacionesLab: linea.observaciones_laboratorio_bascula || '',
                         nuevaMuestra: linea.linea_muestras || '',
                         muestrasProporcionadas: linea.muestras_proporcionadas || '',
-                        //estado: linea.estado !== null ? linea.estado : 'Camión sin llegar',
-                        estado: 'Camión sin llegar',
+                        //estado: 'Camión sin llegar',
                         obsDescargador: linea.observaciones_descargador || '',
                         obsBascula: linea.observaciones_bascula_camion_descarga || '',
+                        estado: linea.estado !== null ? linea.estado : 'Camión sin llegar',
+                        estadoActual: linea.estadoAsociado.descripcion,
+                        estadosRelacion: linea.estadoAsociado.estados_rel,
                     }));
                 });
                 setDataSource(dataSource);
@@ -287,13 +289,7 @@ function TableComponent() {
             title: 'Muestras Proporcionadas',
             dataIndex: 'muestrasProporcionadas',
             key: 'muestrasProporcionadas',
-            // render: (_, record) => (
-            //     <Escribir
-            //         value={record.muestrasProporcionadas}
-            //         onChange={e => handleObservacionesChange(record.key, e.target.value, 'muestrasProporcionadas')}
-            //         placeholder={'Muestra'}
-            //     />
-            // ),
+
         },
         {
             title: 'Hora modificación',
@@ -306,12 +302,21 @@ function TableComponent() {
             key: 'estado',
             render: (text, record) => (
                 <Seleccion
-                    estadoInicial={text}
+                    estadoNum={record.estado}
+                    estadoInicial={record.estadoActual}
+                    estadosRelacion={record.estadosRelacion}
                     onEstadoChange={handleChange}
-                    recordKey={record.key}
-                    naranja={naranja}
-                    tipo={2}
+                    recordKey={record.id_item}
+                    loadData={loadData}
                 />
+
+                // <Seleccion
+                //     estadoInicial={text}
+                //     onEstadoChange={handleChange}
+                //     recordKey={record.key}
+                //     naranja={naranja}
+                //     tipo={2}
+                // />
             ),
         },
         {
@@ -531,22 +536,22 @@ function TableComponent() {
         const colorB = stateColorValue[b.estado] || 4;
         if (colorA < colorB) return -1;
         if (colorA > colorB) return 1;
-    
+
         let dateA;
         let dateB;
-    
+
         if (a.hModificacion) {
             dateA = moment(a.hModificacion, ' h:mm:ss ');
         } else {
             dateA = moment(a.hPesado, ' h:mm:ss ');
         }
-    
+
         if (b.hModificacion) {
             dateB = moment(b.hModificacion, ' h:mm:ss ');
         } else {
             dateB = moment(b.hPesado, ' h:mm:ss ');
         }
-    
+
         return dateB - dateA;
     });
 
