@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { Select } from 'antd';
 
@@ -8,6 +8,11 @@ const Seleccion = ({ estadoNum, estadoInicial, estadosRelacion, onEstadoChange, 
     const [estadoPrevio, setEstadoPrevio] = useState(null);
     const [opciones, setOpciones] = useState([]);
 
+    const naranjaTipos = useMemo(() => ({
+        tipo1: ["Vehículo descargado", "Vehículo pesado"], 
+        tipo2: ['Muestra enviada a Laboratorio', 'Muestra Recibida por el laboratorio', 'Muestra en análisis', 'Pendiente descarga'], 
+        tipo3: ['Camión pesada inicial', 'Aviso a conductor para toma de muestra', 'Muestra tomada', 'Pedido con Permiso descarga', 'Aviso a conductor para ir a descargar']
+    }), []);
 
     useEffect(() => {
         let opcionesConEstadoPrevio = estadosRelacion;
@@ -47,31 +52,19 @@ const Seleccion = ({ estadoNum, estadoInicial, estadosRelacion, onEstadoChange, 
     };
 
     const getSelectStatusClass = (estado, tipo) => {
-        if (tipo === 2 && estado === 'Muestra tomada') {
+        if (naranjaTipos[`tipo${tipo}`] && naranjaTipos[`tipo${tipo}`].includes(estado)) {
+            return 'selectNaranja';
+        } else if (tipo === 2 && estado === 'Muestra tomada') {
             return 'selectAmarillo';
         } else if (tipo === 1 && estado === 'Camión sin llegar') {
+            return 'selectAmarillo';
+        } else if (tipo === 3 && estado === 'Pedido con Permiso descarga') {
             return 'selectAmarillo';
         } else if (estado === 'Incidencia') {
             return 'selectRojo';
         }
         return '';
     };
-
-    //     return (
-    //         <Select
-    //             value={estado}
-    //             onChange={handleChange}
-    //             className={getSelectStatusClass(estado, tipo)}
-    //             style={{ width: '100%' }}
-    //         >
-    //             {opciones.map((opcion) => (
-    //                 <Select.Option key={opcion.id} value={opcion.descripcion}>
-    //                     {opcion.descripcion}
-    //                 </Select.Option>
-    //             ))}
-    //         </Select>
-    //     );
-    // };
 
     return (
         <Select
@@ -90,6 +83,102 @@ const Seleccion = ({ estadoNum, estadoInicial, estadosRelacion, onEstadoChange, 
 };
 
 export default Seleccion;
+
+
+// import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
+// import { Select } from 'antd';
+
+// const Seleccion = ({ estadoNum, estadoInicial, estadosRelacion, onEstadoChange, recordKey, tipo, loadData }) => {
+//     const [estado, setEstado] = useState(estadoInicial);
+//     const [esNum, setENum] = useState(estadoNum);
+//     const [estadoPrevio, setEstadoPrevio] = useState(null);
+//     const [opciones, setOpciones] = useState([]);
+
+
+//     useEffect(() => {
+//         let opcionesConEstadoPrevio = estadosRelacion;
+//         if (estadoPrevio && !estadosRelacion.some(opcion => opcion.descripcion === estadoPrevio.descripcion)) {
+//             opcionesConEstadoPrevio = [...estadosRelacion, estadoPrevio];
+//         }
+//         setOpciones(opcionesConEstadoPrevio);
+//     }, [estadosRelacion, estadoPrevio]);
+
+//     const handleChange = (value) => {
+//         const seleccionado = opciones.find(opcion => opcion.descripcion === value);
+//         const newEstado = seleccionado.id_siguiente;
+//         console.log('newEstado:', newEstado);
+
+//         if (seleccionado.id_estado_inicial !== estadoPrevio) {
+//             setEstadoPrevio({ linea: recordKey, id_anterior: esNum, descripcion: estado });
+//         }
+
+//         setEstado(seleccionado.descripcion);
+//         setENum(newEstado);
+//         onEstadoChange(recordKey, newEstado);
+
+//         const updatedEstado = { "estado": newEstado };
+//         axios({
+//             method: 'put',
+//             url: `http://52.214.60.157:8080/api/linea/${recordKey}`,
+//             headers: { 'Content-Type': 'application/json' },
+//             data: updatedEstado,
+//         })
+//             .then(response => {
+//                 console.log('Estado updated successfully:', response.data);
+//                 loadData();
+//             })
+//             .catch(error => {
+//                 console.error('Error updating estado:', error);
+//             });
+//     };
+
+//     const getSelectStatusClass = (estado, tipo) => {
+//         if (tipo === 2 && estado === 'Muestra tomada') {
+//             return 'selectAmarillo';
+//         } else if (tipo === 1 && estado === 'Camión sin llegar') {
+//             return 'selectAmarillo';
+//         }else if (tipo === 3 && estado === 'Pedido con Permiso descarga') {
+//             return 'selectAmarillo';
+//         }else if (estado === 'Incidencia') {
+//             return 'selectRojo';
+//         }
+//         return '';
+//     };
+
+//     //     return (
+//     //         <Select
+//     //             value={estado}
+//     //             onChange={handleChange}
+//     //             className={getSelectStatusClass(estado, tipo)}
+//     //             style={{ width: '100%' }}
+//     //         >
+//     //             {opciones.map((opcion) => (
+//     //                 <Select.Option key={opcion.id} value={opcion.descripcion}>
+//     //                     {opcion.descripcion}
+//     //                 </Select.Option>
+//     //             ))}
+//     //         </Select>
+//     //     );
+//     // };
+
+//     return (
+//         <Select
+//             value={estado}
+//             onChange={handleChange}
+//             className={getSelectStatusClass(estado, tipo)}
+//             style={{ width: '100%' }}
+//         >
+//             {opciones.map((opcion, index) => (
+//                 <Select.Option key={index} value={opcion.descripcion}>
+//                     {opcion.descripcion}
+//                 </Select.Option>
+//             ))}
+//         </Select>
+//     );
+// };
+
+// export default Seleccion;
 
 
 // import React, { useState } from 'react';

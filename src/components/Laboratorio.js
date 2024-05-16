@@ -15,6 +15,7 @@ function TableComponent() {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRowDetails, setSelectedRowDetails] = useState(null);
     const [text, setText] = useState('');
+    const [sortedInfo, setSortedInfo] = useState({});
     const naranja = ['Muestra enviada a Laboratorio', 'Muestra Recibida por el laboratorio', 'Muestra en análisis', 'Pendiente descarga'];
     const [updateStatus, setUpdateStatus] = useState({});
     const [originalData, setOriginalData] = useState([]);
@@ -34,7 +35,13 @@ function TableComponent() {
         setIsModalVisible(false);
     };
 
-    const handleChange = (key, nuevoEstado) => {
+    const handleChange = (pagination, filters, sorter) => {
+        console.log('Various parameters', pagination, filters, sorter);
+        //setFilteredInfo(filters);
+        setSortedInfo(sorter);
+    };
+
+    const handleEstadoChange = (key, nuevoEstado) => {
         const newData = dataSource.map(item => {
             if (item.key === key) {
                 return { ...item, estado: nuevoEstado };
@@ -217,17 +224,22 @@ function TableComponent() {
             title: 'Venta a nombre',
             dataIndex: 'name',
             key: 'name',
+            sorter: (a, b) => a.name.length - b.name.length,
+            sortOrder: sortedInfo.columnKey === 'name' ? sortedInfo.order : null,
         },
         // {
         //     title: 'Peso bruto',
         //     dataIndex: 'pBruto',
         //     key: 'pBruto',
+        //     sorter: (a, b) => a.pBruto.length - b.pBruto.length,
+        //     sortOrder: sortedInfo.columnKey === 'pBruto' ? sortedInfo.order : null,
         // },
-
         // {
         //     title: 'Nº Bultos',
         //     dataIndex: 'nBultos',
         //     key: 'nBultos',
+        //     sorter: (a, b) => a.nBultos.length - b.nBultos.length,
+        //     sortOrder: sortedInfo.columnKey === 'nBultos' ? sortedInfo.order : null,
         // },
         // {
         //     title: 'Envasado',
@@ -236,65 +248,85 @@ function TableComponent() {
         //     render: (text, record) => (
         //         <Checkbox checked={record.envasado} onChange={(e) => handleCheck(e, record.key)} />
         //     ),
+        //     sorter: (a, b) => a.envasado.length - b.envasado.length,
+        //     sortOrder: sortedInfo.columnKey === 'envasado' ? sortedInfo.order : null,
         // },
         // {
         //     title: 'Tipo',
         //     dataIndex: 'tipo',
         //     key: 'tipo',
+        //     sorter: (a, b) => a.tipo.length - b.tipo.length,
+        //     sortOrder: sortedInfo.columnKey === 'tipo' ? sortedInfo.order : null,
         // },
         {
             title: 'Descripción',
             dataIndex: 'descripcion',
             key: 'descripcion',
+            sorter: (a, b) => a.descripcion.length - b.descripcion.length,
+            sortOrder: sortedInfo.columnKey === 'descripcion' ? sortedInfo.order : null,
         },
         {
             title: 'Código almacén',
             dataIndex: 'cAlmacen',
             key: 'cAlmacen',
+            sorter: (a, b) => a.cAlmacen.length - b.cAlmacen.length,
+            sortOrder: sortedInfo.columnKey === 'cAlmacen' ? sortedInfo.order : null,
         },
         {
             title: 'Peso neto',
             dataIndex: 'pNeto',
             key: 'pNeto',
+            sorter: (a, b) => a.pNeto.length - b.pNeto.length,
+            sortOrder: sortedInfo.columnKey === 'pNeto' ? sortedInfo.order : null,
         },
         {
             title: 'Cantidad Báscula',
             dataIndex: 'cantBascula',
             key: 'cantBascula',
+            sorter: (a, b) => a.cantBascula.length - b.cantBascula.length,
+            sortOrder: sortedInfo.columnKey === 'cantBascula' ? sortedInfo.order : null,
         },
-
         {
             title: 'Tipo bulto',
             dataIndex: 'tBulto',
             key: 'tBulto',
+            sorter: (a, b) => a.tBulto.length - b.tBulto.length,
+            sortOrder: sortedInfo.columnKey === 'tBulto' ? sortedInfo.order : null,
         },
         // {
         //     title: 'Bultos',
         //     dataIndex: 'bultos',
         //     key: 'bultos',
+        //     sorter: (a, b) => a.bultos.length - b.bultos.length,
+        //     sortOrder: sortedInfo.columnKey === 'bultos' ? sortedInfo.order : null,
         // },
         {
             title: 'Observaciones descargador',
             dataIndex: 'obsDescargador',
             key: 'obsDescargador',
-
+            sorter: (a, b) => a.obsDescargador.length - b.obsDescargador.length,
+            sortOrder: sortedInfo.columnKey === 'obsDescargador' ? sortedInfo.order : null,
         },
         {
             title: 'Observaciones bascula',
             dataIndex: 'obsBascula',
             key: 'obsBascula',
-
+            sorter: (a, b) => a.obsBascula.length - b.obsBascula.length,
+            sortOrder: sortedInfo.columnKey === 'obsBascula' ? sortedInfo.order : null,
         },
         {
             title: 'Muestras Proporcionadas',
             dataIndex: 'muestrasProporcionadas',
             key: 'muestrasProporcionadas',
-
+            sorter: (a, b) => a.muestrasProporcionadas.length - b.muestrasProporcionadas.length,
+            sortOrder: sortedInfo.columnKey === 'muestrasProporcionadas' ? sortedInfo.order : null,
         },
         {
             title: 'Hora modificación',
             dataIndex: 'hModificacion',
             key: 'hModificacion',
+            sorter: (a, b) => moment(a.hModificacion).valueOf() - moment(b.hModificacion).valueOf(),
+            sortOrder: sortedInfo.columnKey === 'hModificacion' ? sortedInfo.order : null,
         },
         {
             title: 'Estado',
@@ -305,20 +337,14 @@ function TableComponent() {
                     estadoNum={record.estado}
                     estadoInicial={record.estadoActual}
                     estadosRelacion={record.estadosRelacion}
-                    onEstadoChange={handleChange}
+                    onEstadoChange={handleEstadoChange}
                     recordKey={record.id_item}
                     loadData={loadData}
                     tipo={2}
                 />
-
-                // <Seleccion
-                //     estadoInicial={text}
-                //     onEstadoChange={handleChange}
-                //     recordKey={record.key}
-                //     naranja={naranja}
-                //     tipo={2}
-                // />
             ),
+            sorter: (a, b) => a.estado.length - b.estado.length,
+            sortOrder: sortedInfo.columnKey === 'estado' ? sortedInfo.order : null,
         },
         {
             title: 'Punto de descarga laboratorio',
@@ -327,6 +353,8 @@ function TableComponent() {
             render: (_, record) => (
                 <DescLab></DescLab>
             ),
+            sorter: (a, b) => a.pDescargaLab.length - b.pDescargaLab.length,
+            sortOrder: sortedInfo.columnKey === 'pDescargaLab' ? sortedInfo.order : null,
         },
         {
             title: 'Observaciones',
@@ -347,10 +375,10 @@ function TableComponent() {
                         onKeyDown={(e) => handleKeyPress(e, record.id_item)}
                         onChange={(e) => handleObservacionesChange(record.id_item, e)}
                     />
-
                 </div>
-
             ),
+            sorter: (a, b) => a.observacionesBCD.length - b.observacionesBCD.length,
+            sortOrder: sortedInfo.columnKey === 'observacionesBCD' ? sortedInfo.order : null,
         },
         {
             title: 'Solicita nueva muestra',
@@ -363,6 +391,8 @@ function TableComponent() {
                     placeholder={'Nueva muestra'}
                 />
             ),
+            sorter: (a, b) => a.nuevaMuestra.length - b.nuevaMuestra.length,
+            sortOrder: sortedInfo.columnKey === 'nuevaMuestra' ? sortedInfo.order : null,
         },
         {
             title: 'Detalles',
@@ -370,14 +400,16 @@ function TableComponent() {
             render: (_, record) => (
                 <Button onClick={() => showModal(record)}>Ver Detalles</Button>
             ),
+            sorter: (a, b) => a.detalles.length - b.detalles.length,
+            sortOrder: sortedInfo.columnKey === 'detalles' ? sortedInfo.order : null,
         }
-
     ]).map(col => ({
         ...col,
         onHeaderCell: () => ({
             style: { backgroundColor: '#f0f2f5' }
         }),
     }));
+    
 
     const columns2 = () => ([
         {
@@ -558,7 +590,7 @@ function TableComponent() {
 
     return (
         <div className='Table'>
-            <Table dataSource={sortedData} columns={columns()} pagination={false} style={{ padding: "10px" }} />
+            <Table dataSource={dataSource} columns={columns()} pagination={false} onChange={handleChange} style={{ padding: "10px" }} />
             <Modal title="Detalles de la fila" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                 <table className='table'>
                     <tbody>
@@ -575,164 +607,3 @@ function TableComponent() {
     );
 }
 export default TableComponent;
-
-/*const loadData = () => {
-        axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
-            .then(response => {
-                console.log(response.data);
-                const dataSource = response.data.cabeza.map(item => ({
-                    key: item.id.toString(),
-                    id_item: item.lineas && item.lineas.length > 0 ? item.lineas[0].id : '',
-                    vNombre: item.id_navision,
-                    name: item.venta_nombre,
-                    hPesado: moment(item.hora_pesado_bruto).format(' h:mm:ss '),
-                    pBruto: item.peso_bruto,
-                    pNeto: (item.peso_bruto - item.peso_tara),
-                    nBultos: item.n_bulto,
-                    envasado: false,
-                    tipo: item.lineas && item.lineas.length > 0 ? item.lineas[0].type : 'No type',
-                    descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
-                    cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
-                    cantBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
-                    tBulto: item.lineas && item.lineas.length > 0 ? item.lineas[0].tipo_bulto : '',
-                    bultos: item.lineas && item.lineas.length > 0 ? item.lineas[0].bulto : '',
-                    pDescargaLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].punto_descarga_laboratorio || '' : '',
-                    //pDescargaLab: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
-                    observacionesLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
-                    //observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_bascula_camion_descarga || '' : '',
-                    nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
-                    muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
-                    hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
-                    estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
-                    obsDescargador: '',
-                    obsBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_bascula_camion_descarga || '' : '',
-                }));
-                setDataSource(dataSource);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-
-    }*/
-// axios.get('http://52.214.60.157:8080/api/cabecera/relacion')
-//     .then(response => {
-//         console.log(response.data);
-//         const dataSource = response.data.cabeza.map(item => ({
-//             key: item.id.toString(),
-//             id_item: item.lineas && item.lineas.length > 0 ? item.lineas[0].id : '',
-//             vNombre: item.id_navision,
-//             name: item.venta_nombre,
-//             hPesado: moment(item.hora_pesado_bruto).format(' DD/MM/YYYY, h:mm:ss a'),
-//             pBruto: item.peso_bruto,
-//             pNeto: (item.peso_bruto - item.peso_tara),
-//             nBultos: item.n_bulto,
-//             envasado: false,
-//             tipo: item.lineas && item.lineas.length > 0 ? item.lineas[0].type : 'No type',
-//             descripcion: item.lineas && item.lineas.length > 0 ? item.lineas[0].descripcion : '',
-//             cAlmacen: item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : '',
-//             cantBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].cantidad_bascula : '',
-//             tBulto: item.lineas && item.lineas.length > 0 ? item.lineas[0].tipo_bulto : '',
-//             bultos: item.lineas && item.lineas.length > 0 ? item.lineas[0].bulto : '',
-//             pDescargaLab: item.lineas && item.lineas.length > 0 ? item.lineas[0].punto_descarga_laboratorio || '' : '',
-//             //pDescargaLab: traductor(item.lineas && item.lineas.length > 0 ? item.lineas[0].codigo_almacen : ''),
-//             observacionesBCD: item.lineas && item.lineas.length > 0 ? item.lineas[0].observaciones_laboratorio_bascula || '' : '',
-//             nuevaMuestra: item.lineas && item.lineas.length > 0 ? item.lineas[0].linea_muestras || '' : '',
-//             muestrasProporcionadas: item.lineas && item.lineas.length > 0 ? item.lineas[0].muestras_proporcionadas || '' : '',
-//             hModificacion: item.lineas && item.lineas.length > 0 ? item.lineas[0].hora_modificacion || '' : '',
-//             estado: item.lineas && item.lineas.length > 0 && item.lineas[0].estado !== null ? item.lineas[0].estado : 'Camión sin llegar',
-//             obsDescargador: '',
-//             obsBascula: item.lineas && item.lineas.length > 0 ? item.lineas[0].obsevaciones_bascula_camion_descarga || '' : '',
-//         }));
-//         setDataSource(dataSource);
-//     })
-//     .catch(error => {
-//         console.log(error);
-//     });
-// {
-//     key: '1',
-//     vNombre: '010101',
-//     pBruto: '25',
-//     pNeto: '20',
-//     nBultos: '4',
-//     envasado: true,
-//     tipo: 'Articulo',
-//     descripcion: 'Ácido sulfúrico',
-//     cAlmacen: '1030',
-//     cantBascula: '15',
-//     tBulto: '20010',
-//     bultos: '4',
-//     pDescargaLab: '',
-//     observacionesBCD: '',
-//     nuevaMuestra: '',
-//     muestrasProporcionadas: '',
-//     hModificacion: '08:30',
-//     estado: 'Muestra enviada a Laboratorio',
-//     obsvDescargador: '',
-//     obsvLaboratorio: '',
-// },
-// {
-//     key: '2',
-//     vNombre: '010102',
-//     pBruto: '30',
-//     pNeto: '25',
-//     nBultos: '5',
-//     envasado: true,
-//     tipo: 'Articulo',
-//     descripcion: 'Ácido sulfúrico',
-//     cAlmacen: '1030',
-//     cantBascula: '20',
-//     tBulto: '20010',
-//     bultos: '5',
-//     pDescargaLab: '',
-//     observacionesBCD: '',
-//     nuevaMuestra: '',
-//     muestrasProporcionadas: '',
-//     hModificacion: '09:40',
-//     estado: 'Muestra en análisis',
-//     obsvDescargador: '',
-//     obsvLaboratorio: '',
-// },
-// {
-//     key: '3',
-//     vNombre: '010103',
-//     pBruto: '28',
-//     pNeto: '23',
-//     nBultos: '6',
-//     envasado: false,
-//     tipo: 'Articulo',
-//     descripcion: 'Ácido sulfúrico',
-//     cAlmacen: '1030',
-//     cantBascula: '18',
-//     tBulto: '20010',
-//     bultos: '6',
-//     pDescargaLab: '',
-//     observacionesBCD: '',
-//     nuevaMuestra: '',
-//     muestrasProporcionadas: '',
-//     hModificacion: '10:15',
-//     estado: 'Muestra tomada',
-//     obsvDescargador: '',
-//     obsvLaboratorio: '',
-// },
-// {
-//     key: '4',
-//     vNombre: '010104',
-//     pBruto: '30',
-//     pNeto: '20',
-//     nBultos: '5',
-//     envasado: false,
-//     tipo: 'Articulo',
-//     descripcion: 'Ácido sulfúrico',
-//     cAlmacen: '1030',
-//     cantBascula: '20',
-//     tBulto: '20010',
-//     bultos: '5',
-//     pDescargaLab: '',
-//     observacionesBCD: '',
-//     nuevaMuestra: '',
-//     muestrasProporcionadas: '',
-//     hModificacion: '10:00',
-//     estado: 'Permiso descarga',
-//     obsvDescargador: '',
-//     obsvLaboratorio: '',
-// },
